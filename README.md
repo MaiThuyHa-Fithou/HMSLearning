@@ -1,2 +1,1 @@
-# HMSLearning
-Learning hms core and services
+#Tu hoc HMS Core, HMS api

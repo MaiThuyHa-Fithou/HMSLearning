@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Find My Friends</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_friend">Friends</string>
+    <string name="title_add_friend">Add friend</string>
+    <string name="title_profile">Profile</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>

@@ -1,5 +1,8 @@
 package com.mtha.findmyfriends.ui.dashboard;
 
+import android.app.ActionBar;
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,14 +11,16 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.mtha.findmyfriends.MainActivity;
 import com.mtha.findmyfriends.R;
 
 public class DashboardFragment extends Fragment {
-
+    private AppCompatActivity appCompatActivity;
     private DashboardViewModel dashboardViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -30,6 +35,22 @@ public class DashboardFragment extends Fragment {
                 textView.setText(s);
             }
         });
+        //add back button on ActionBar
+        appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         return root;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if(context instanceof Activity)
+            appCompatActivity=(AppCompatActivity)context;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
     }
 }

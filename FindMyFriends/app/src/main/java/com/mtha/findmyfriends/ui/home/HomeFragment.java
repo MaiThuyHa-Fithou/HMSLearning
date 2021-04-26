@@ -1,5 +1,7 @@
 package com.mtha.findmyfriends.ui.home;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -16,6 +19,7 @@ import com.mtha.findmyfriends.R;
 
 public class HomeFragment extends Fragment {
 
+  //  private AppCompatActivity appCompatActivity;
     private HomeViewModel homeViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -30,6 +34,14 @@ public class HomeFragment extends Fragment {
                 textView.setText(s);
             }
         });
+    //    appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    //    appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         return root;
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+      //  if(context instanceof Activity)
+  //          appCompatActivity=(AppCompatActivity)context;
     }
 }

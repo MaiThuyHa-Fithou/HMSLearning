@@ -20,6 +20,8 @@ import com.mtha.findmyfriends.MainActivity;
 import com.mtha.findmyfriends.R;
 import com.mtha.findmyfriends.utils.Contants;
 
+import java.io.Serializable;
+
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     AccountAuthParams authParams;
@@ -61,10 +63,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             if(authAccountTask.isSuccessful()){
                 //call MainActivity class
                 AuthAccount authAccount = authAccountTask.getResult();
-                Bundle bundle = new Bundle();
-                bundle.putString("userName", authAccount.getDisplayName());
-                startActivity(new Intent(LoginActivity.this, MainActivity.class),
-                        bundle);
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 Log.e(Contants.TAG, "serverAuthCode:" + authAccount.getAuthorizationCode());
                 Log.e(Contants.TAG, "serverAuthCode:" + authAccount.getDisplayName());
             }else {

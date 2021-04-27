@@ -23,7 +23,7 @@ import com.huawei.hmf.tasks.OnCanceledListener;
 import com.huawei.hmf.tasks.OnCompleteListener;
 import com.huawei.hmf.tasks.Task;
 import com.huawei.hms.common.ApiException;
-import com.huawei.hms.ml.common.utils.SmartLog;
+
 import com.huawei.hms.support.account.AccountAuthManager;
 import com.huawei.hms.support.account.request.AccountAuthParams;
 import com.huawei.hms.support.account.request.AccountAuthParamsHelper;
@@ -74,39 +74,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
     }
-        /*
-        navView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                Fragment fragment;
-                switch (item.getItemId()){
-                    case R.id.navigation_friend:
-                        fragment = new FriendsFragment();
-                        loadFragment(fragment);
-                        break;
-                    case R.id.navigation_add_friend:
-                        fragment = new AddFriendFragment();
-                        loadFragment(fragment);
-                        break;
-                    case R.id.navigation_profile:
-                        fragment = new ProfileFragment();
-                        loadFragment(fragment);
-                        break;
-                }
-                return false;
-            }
-        });
-
-    }
-
-    private void loadFragment(Fragment fragment) {
-        // load fragment
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.nav_host_fragment, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    } */
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_menu, menu);

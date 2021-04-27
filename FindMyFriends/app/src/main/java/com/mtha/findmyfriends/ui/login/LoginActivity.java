@@ -1,6 +1,9 @@
 package com.mtha.findmyfriends.ui.login;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -8,6 +11,7 @@ import android.widget.EditText;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.huawei.hmf.tasks.Task;
 import com.huawei.hms.common.ApiException;
@@ -41,6 +45,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         authService = AccountAuthManager.getService(LoginActivity.this,authParams);
         startActivityForResult(authService.getSignInIntent(), Contants.SIGN_IN_ID);
 
+
     }
     @Override
     public void onClick(View view) {
@@ -63,9 +68,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             if(authAccountTask.isSuccessful()){
                 //call MainActivity class
                 AuthAccount authAccount = authAccountTask.getResult();
+                checkPermissions(LoginActivity.this);
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 Log.e(Contants.TAG, "serverAuthCode:" + authAccount.getAuthorizationCode());
                 Log.e(Contants.TAG, "serverAuthCode:" + authAccount.getDisplayName());
+                this.finish();
             }else {
                 Log.e(Contants.TAG, "sign in failed : " +((ApiException) authAccountTask.getException())
                         .getStatusCode());
@@ -77,5 +84,32 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         findViewById(R.id.register).setOnClickListener(this);
         findViewById(R.id.login).setOnClickListener(this);
+    }
+
+    private static void checkPermissions(AppCompatActivity activityCompat) {
+        // You must have the ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission. Otherwise, the location service
+        // is unavailable.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            Log.i(Contants.TAG, "android sdk < 28 Q");
+            if (ActivityCompat.checkSelfPermission(activityCompat,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(activityCompat,
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                String[] strings =
+                        {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+                ActivityCompat.requestPermissions(activityCompat, strings, 1);
+            }
+        } else {
+            if (ActivityCompat.checkSelfPermission(activityCompat,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(activityCompat,
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(activityCompat,
+                    "android.permission.ACCESS_BACKGROUND_LOCATION") != PackageManager.PERMISSION_GRANTED) {
+                String[] strings = {android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION, "android.permission.ACCESS_BACKGROUND_LOCATION"};
+                ActivityCompat.requestPermissions(activityCompat, strings, 2);
+            }
+        }
     }
 }

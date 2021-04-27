@@ -19,4 +19,24 @@
     <string name="query_product">Query Product</string>
     <string name="please_take_picture">please take picture</string>
     <string name="please_scan_barcode">please scan barcode</string>
+
+    <string name="title_result">Result</string>
+    <string name="code_format">Code Format</string>
+    <string name="result_type">Result Type</string>
+    <string name="result_content">Result</string>
+
+    <string name="copy">Copy</string>
+    <string name="add_contact">Add Contact</string>
+    <string name="connect_network">Connet to network</string>
+    <string name="add_calendar">Add to calendar</string>
+    <string name="send_sms">Send SMS</string>
+    <string name="call">Call</string>
+    <string name="nivigation">Nivigation</string>
+    <string name="send_email">Send Email</string>
+    <string name="copy_toast">Content has been copied</string>
+    <string name="open_browser">Open in browser</string>
+    <string name="mwc_title">HMS Core Scan Kit Demo</string>
+    <string name="mwc_subject">About Scan Kit</string>
+    <string name="mwc_detail">An in-app scanner for 1D and 2D barcodes connects your app to real-world scenarios and helps you build powerful code scanning capabilities with a minimum of 5 lines of code.</string>
+    <string name="scan_showresult">Scan results will show on screen</string>
 </resources>

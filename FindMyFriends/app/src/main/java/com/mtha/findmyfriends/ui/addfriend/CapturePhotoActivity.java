@@ -8,12 +8,14 @@ import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.huawei.hms.ml.common.utils.SmartLog;
+
+import com.huawei.hms.mlsdk.common.internal.client.SmartLog;
 import com.mtha.findmyfriends.R;
 import com.mtha.findmyfriends.utils.CameraConfiguration;
 import com.mtha.findmyfriends.utils.Contants;
@@ -68,7 +70,7 @@ public class CapturePhotoActivity extends AppCompatActivity {
             try {
                 this.preview.start(this.lensEngine, false);
             } catch (IOException e) {
-                SmartLog.e(CapturePhotoActivity.TAG, "Unable to start lensEngine.", e);
+                Log.e(CapturePhotoActivity.TAG, "Unable to start lensEngine.", e);
                 this.lensEngine.release();
                 this.lensEngine = null;
             }

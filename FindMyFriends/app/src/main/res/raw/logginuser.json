@@ -1,0 +1,20 @@
+{
+  "user": [
+    {
+      "email": "maithithuyha@hou.edu.vn",
+      "password": "Mai@123#",
+      "username":"maiha",
+      "latitude": 31.98,
+      "longitude": 118.76,
+      "img": "avata.jpg"
+    },
+    {
+      "email": "hamaibk@gmail.com",
+      "password": "Mai@123#",
+      "username":"hamai",
+      "latitude": 4.10932,
+      "longitude": 109.455475,
+      "img": "avata.jpg"
+    }
+  ]
+}

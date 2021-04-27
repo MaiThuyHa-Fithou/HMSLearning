@@ -1,6 +1,10 @@
 package com.mtha.findmyfriends;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -10,32 +14,51 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.huawei.hmf.tasks.OnCanceledListener;
 import com.huawei.hmf.tasks.OnCompleteListener;
 import com.huawei.hmf.tasks.Task;
 import com.huawei.hms.common.ApiException;
+import com.huawei.hms.ml.common.utils.SmartLog;
 import com.huawei.hms.support.account.AccountAuthManager;
 import com.huawei.hms.support.account.request.AccountAuthParams;
 import com.huawei.hms.support.account.request.AccountAuthParamsHelper;
 import com.huawei.hms.support.account.service.AccountAuthService;
+import com.mtha.findmyfriends.ui.addfriend.AddFriendFragment;
+import com.mtha.findmyfriends.ui.friends.FriendsFragment;
 import com.mtha.findmyfriends.ui.login.LoginActivity;
+import com.mtha.findmyfriends.ui.profile.ProfileFragment;
 import com.mtha.findmyfriends.utils.Contants;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     AccountAuthParams authParams;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +68,44 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
+                R.id.navigation_friend, R.id.navigation_add_friend, R.id.navigation_profile)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+    }
+        /*
+        navView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Fragment fragment;
+                switch (item.getItemId()){
+                    case R.id.navigation_friend:
+                        fragment = new FriendsFragment();
+                        loadFragment(fragment);
+                        break;
+                    case R.id.navigation_add_friend:
+                        fragment = new AddFriendFragment();
+                        loadFragment(fragment);
+                        break;
+                    case R.id.navigation_profile:
+                        fragment = new ProfileFragment();
+                        loadFragment(fragment);
+                        break;
+                }
+                return false;
+            }
+        });
 
     }
+
+    private void loadFragment(Fragment fragment) {
+        // load fragment
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.nav_host_fragment, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    } */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -68,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case android.R.id.home:
                 onBackPressed();
+                break;
             case R.id.item_signOut:
                 authParams = new AccountAuthParamsHelper(AccountAuthParams.DEFAULT_AUTH_REQUEST_PARAM).
                         setProfile().setAuthorizationCode().createParams();
@@ -95,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 
 
 

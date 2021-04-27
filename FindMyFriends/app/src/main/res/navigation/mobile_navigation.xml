@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_friend">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.mtha.findmyfriends.ui.home.HomeFragment"
+        android:id="@+id/navigation_friend"
+        android:name="com.mtha.findmyfriends.ui.friends.FriendsFragment"
         android:label="@string/title_friend"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_friends" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.mtha.findmyfriends.ui.dashboard.DashboardFragment"
+        android:id="@+id/navigation_add_friend"
+        android:name="com.mtha.findmyfriends.ui.addfriend.AddFriendFragment"
         android:label="@string/title_add_friend"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_addfriend" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.mtha.findmyfriends.ui.notifications.NotificationsFragment"
+        android:id="@+id/navigation_profile"
+        android:name="com.mtha.findmyfriends.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_profile" />
 </navigation>

@@ -15,7 +15,7 @@ import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 
 
-import com.huawei.hms.mlsdk.common.internal.client.SmartLog;
+import com.huawei.hms.ml.common.utils.SmartLog;
 import com.mtha.findmyfriends.R;
 import com.mtha.findmyfriends.utils.CameraConfiguration;
 import com.mtha.findmyfriends.utils.Contants;

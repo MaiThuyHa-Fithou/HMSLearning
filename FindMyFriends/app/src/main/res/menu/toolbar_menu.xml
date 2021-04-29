@@ -6,15 +6,15 @@
         android:id="@+id/item_qr_scan"
         android:icon="@drawable/outline_qr_code_scanner_24"
         android:title="My QRCODE"
-        app:showAsAction="collapseActionView|withText" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/item_setting"
         android:icon="@drawable/outline_settings_24"
         android:title="Setting"
-        app:showAsAction="collapseActionView" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/item_signOut"
         android:icon="@drawable/outline_logout_24"
         android:title="SignOut"
-        app:showAsAction="collapseActionView|withText" />
+        app:showAsAction="always" />
 </menu>

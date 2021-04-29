@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".qrcode_scanner">
+    tools:context=".ui.addfriend.qrcode_scanner">
 
     <TextView
         android:id="@+id/txtResult"

@@ -1,27 +1,19 @@
 package com.mtha.findmyfriends;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.content.Context;
+import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.Toast;
-import android.widget.Toolbar;
+import android.view.View;
+import android.widget.EditText;
 
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.huawei.hmf.tasks.OnCanceledListener;
 import com.huawei.hmf.tasks.OnCompleteListener;
 import com.huawei.hmf.tasks.Task;
 import com.huawei.hms.common.ApiException;
@@ -33,33 +25,20 @@ import com.huawei.hms.support.account.AccountAuthManager;
 import com.huawei.hms.support.account.request.AccountAuthParams;
 import com.huawei.hms.support.account.request.AccountAuthParamsHelper;
 import com.huawei.hms.support.account.service.AccountAuthService;
-import com.mtha.findmyfriends.ui.addfriend.AddFriendFragment;
-import com.mtha.findmyfriends.ui.addfriend.DisPlayActivity;
-import com.mtha.findmyfriends.ui.addfriend.qrcode_scanner;
-import com.mtha.findmyfriends.ui.friends.FriendsFragment;
+import com.mtha.findmyfriends.data.model.Contact;
+import com.mtha.findmyfriends.data.model.ContactDbHelper;
 import com.mtha.findmyfriends.ui.login.LoginActivity;
-import com.mtha.findmyfriends.ui.profile.ProfileFragment;
 import com.mtha.findmyfriends.utils.Contants;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_SCAN_ONE = 0X01;
     public static final int DEFAULT_VIEW = 0x22;
     public static final String RESULT = "SCAN_RESULT";
-    Button btnSave;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,14 +96,52 @@ public class MainActivity extends AppCompatActivity {
             HmsScan obj = data.getParcelableExtra(ScanUtil.RESULT);
             Log.d("SCAN_CODE",obj.originalValue);
             if (obj != null) {
-                Toast.makeText(this, "" +obj.getOriginalValue(), Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, AddFriendFragment.class);
-                intent.putExtra(RESULT, obj);
-                startActivity(intent);
+
+                //call dialog form
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+               View contactDetail = LayoutInflater.from(this).inflate(R.layout.contact_dialog, null);
+               builder.setView(contactDetail);
+                EditText etName = (EditText) contactDetail.findViewById(R.id.etName);
+                EditText etPhone = (EditText) contactDetail.findViewById(R.id.etPhone);
+                EditText etEmail = (EditText)contactDetail.findViewById(R.id.etEmail);
+                EditText etAddress = (EditText) contactDetail.findViewById(R.id.etAddress);
+
+
+                etName.setText(obj.getContactDetail().getPeopleName().getFullName());
+                etPhone.setText(obj.getContactDetail().getTelPhoneNumbers().get(0).getTelPhoneNumber());
+                etEmail.setText(obj.getContactDetail().getEmailContents().get(0).getAddressInfo());
+
+                StringBuilder addressBuilder = new StringBuilder();
+                for (String addressLine : obj.getContactDetail().getAddressesInfos().get(0).getAddressDetails()) {
+                    addressBuilder.append(addressLine);
+                }
+                etAddress.setText(addressBuilder.toString());
+
+                final AlertDialog dialog = builder.create();
+
+
+                contactDetail.findViewById(R.id.btnAdd).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //get data contact and save json object
+                        String fullName = etName.getText().toString();
+                        String phoneNumb = etPhone.getText().toString();
+                        String email = etEmail.getText().toString();
+                        String address = etAddress.getText().toString();
+                        Contact contact = new Contact(fullName,phoneNumb,email,address);
+                        new ContactDbHelper(MainActivity.this).insContact(contact);
+                        dialog.dismiss();
+                    }
+                });
+
+                //tao dialog
+                dialog.show();
+
             }
 
         }
     }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){

@@ -7,60 +7,6 @@
     android:keepScreenOn="true"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_alignParentTop="true"
-        android:layout_above="@+id/linear_views"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <ImageView
-            android:id="@+id/previewPane"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:scaleType="fitXY"></ImageView>
 
-    </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/linear_views"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentTop="true"
-        android:background="@color/white"
-        android:orientation="horizontal">
-
-        <RelativeLayout
-            android:id="@+id/relativate_scan"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <RelativeLayout
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_centerHorizontal="true"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@drawable/outline_qr_code_2_24"></ImageView>
-
-            </RelativeLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-
-                android:gravity="center"
-                android:text="@string/scan_barcode"
-                android:textColor="@color/secondary_text_color"
-                android:textSize="11sp"></TextView>
-        </RelativeLayout>
-
-
-    </LinearLayout>
 
 </RelativeLayout>

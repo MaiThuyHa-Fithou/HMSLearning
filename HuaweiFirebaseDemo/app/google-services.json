@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "863468796098",
+    "project_id": "authfirebasedatabase",
+    "storage_bucket": "authfirebasedatabase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:863468796098:android:bf46a788e581e5c327e35b",
+        "android_client_info": {
+          "package_name": "com.mtha.huaweifirebasedemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "863468796098-ubm89nm8i2qbj4h56vi957s28bckkei9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mtha.huaweifirebasedemo",
+            "certificate_hash": "22773af81dbde65272afae9811d565e4eb72c4a2"
+          }
+        },
+        {
+          "client_id": "863468796098-jnocr9vr2ti85baft3v33dv6o2rmkho9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTZs0KpZ28FpA9uUAwwMMHe50AWZdi4bw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "863468796098-jnocr9vr2ti85baft3v33dv6o2rmkho9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

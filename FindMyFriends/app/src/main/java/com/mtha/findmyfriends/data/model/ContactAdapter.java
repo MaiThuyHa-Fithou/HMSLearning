@@ -26,13 +26,13 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     List<Contact> listContact;
     List<Contact> listContactFilter;
     private ContactAdapterListener listener;
-    private Resources res = null;
+
     public ContactAdapter(Context context, List<Contact> listContact, ContactAdapterListener listener) {
         this.listener = listener;
         this.context = context;
         this.listContact = listContact;
         this.listContactFilter = listContact;
-        res=context.getResources();
+
     }
 
     @NonNull
@@ -46,10 +46,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Contact contact = listContact.get(position);
         holder.tvFullName.setText(contact.getFullName());
-//        Glide.with(context).load(contact.getImage()).into(holder.img);
-        int resourceId = res.getIdentifier(contact.getImage(), "drawable",
-                context.getPackageName());
-        holder.img.setImageResource(resourceId);
     }
 
     @Override

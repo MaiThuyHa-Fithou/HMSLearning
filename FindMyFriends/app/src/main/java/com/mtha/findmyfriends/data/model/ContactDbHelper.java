@@ -81,7 +81,6 @@ public class ContactDbHelper extends SQLiteOpenHelper {
 
     public JSONArray getJsonContacts() throws JSONException {
         JSONArray listContacts = new JSONArray();
-        ArrayList<Contact> contacts = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * from " + TABLE_CONTACT, null);
         cursor.moveToFirst();

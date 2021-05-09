@@ -71,13 +71,16 @@ public class ListFriendFragment extends Fragment implements ContactAdapter.Conta
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new MyDividerItemDecoration(root.getContext(), DividerItemDecoration.VERTICAL, 10));
         contactDbHelper = new ContactDbHelper(appCompatActivity);
+        listContact = new ArrayList<>();
+        contactAdapter = new ContactAdapter(appCompatActivity,listContact,this);
+        recyclerView.setAdapter(contactAdapter);
         getContactListView();
         return root;
     }
     private void getContactListView(){
-        listContact = contactDbHelper.getAllContacts();
-        contactAdapter = new ContactAdapter(appCompatActivity,listContact,this);
-        recyclerView.setAdapter(contactAdapter);
+        listContact.clear();
+        listContact.addAll(contactDbHelper.getAllContacts());
+        contactAdapter.notifyDataSetChanged();
     }
 
     @Override

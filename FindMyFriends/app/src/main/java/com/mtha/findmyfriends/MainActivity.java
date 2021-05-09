@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
         checkPermissions(MainActivity.this);
         locationSetting = new CheckLocationSetting(MainActivity.this,getApplicationContext());
+        contactDbHelper = new ContactDbHelper(MainActivity.this);
     }
 
 
@@ -163,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                     etName.setText(fullname);
                     etEmail.setText(email);
                     etPhone.setText(phone);
-                    Glide.with(MainActivity.this).load(image).into(imageView);
+      //              Glide.with(MainActivity.this).load(image).into(imageView);
                     etLatitude.setText(latitude+"");
                     etLongtitude.setText(longtitude+"");
                 } catch (JSONException e) {

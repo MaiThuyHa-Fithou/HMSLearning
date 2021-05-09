@@ -9,6 +9,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,7 +58,7 @@ public class ContactDbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * from " + TABLE_CONTACT, null);
         cursor.moveToFirst();
-        while (!cursor.isAfterLast()){
+        while (cursor.moveToNext()){
             String fullName = cursor.getString(1);
             String phoneNumb = cursor.getString(2);
             String email = cursor.getString(3);
@@ -65,15 +66,16 @@ public class ContactDbHelper extends SQLiteOpenHelper {
             double latitude = cursor.getDouble(5);
             double longtitude = cursor.getDouble(6);
             contacts.add(new Contact(fullName,phoneNumb,email,image,latitude,longtitude));
-            cursor.moveToNext();
+
         }
         return contacts;
     }
 
-    public void insContact(Contact contact){
+    public void insContact(@NotNull Contact contact){
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("INSERT INTO " + TABLE_CONTACT + " ( fullname, phoneNumb, email, image, latitude, longtitude ) " +
-                "VALUES (?,?,?,?,?) " , new String[]{contact.getFullName(), contact.getPhoneNumb(), contact.getEmail(),contact.getImage()
+                "VALUES (?,?,?,?,?,?) " , new String[]{contact.getFullName(),
+                contact.getPhoneNumb(), contact.getEmail(),contact.getImage()
         ,contact.getLatitude()+"", contact.getLongitude()+""});
     }
 
@@ -83,7 +85,7 @@ public class ContactDbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * from " + TABLE_CONTACT, null);
         cursor.moveToFirst();
-        while (!cursor.isAfterLast()){
+        while (cursor.moveToNext()){
             String fullName = cursor.getString(1);
             String phoneNumb = cursor.getString(2);
             String email = cursor.getString(3);
@@ -98,7 +100,6 @@ public class ContactDbHelper extends SQLiteOpenHelper {
             contact.put("latitude", latitude);
             contact.put("longtitude", longtitude);
             listContacts.put(contact);
-            cursor.moveToNext();
         }
         return listContacts;
     }

@@ -70,7 +70,7 @@ public class ListFriendFragment extends Fragment implements ContactAdapter.Conta
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new MyDividerItemDecoration(root.getContext(), DividerItemDecoration.VERTICAL, 10));
-        contactDbHelper = new ContactDbHelper(root.getContext());
+        contactDbHelper = new ContactDbHelper(appCompatActivity);
         getContactListView();
         return root;
     }
@@ -125,7 +125,7 @@ public class ListFriendFragment extends Fragment implements ContactAdapter.Conta
                 return false;
             }
         });
-       // super.onCreateOptionsMenu(menu, inflater);
+       super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override

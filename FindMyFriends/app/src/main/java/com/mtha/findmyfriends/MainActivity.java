@@ -9,9 +9,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.huawei.hmf.tasks.OnCompleteListener;
@@ -28,6 +30,7 @@ import com.huawei.hms.support.account.service.AccountAuthService;
 import com.mtha.findmyfriends.data.model.Contact;
 import com.mtha.findmyfriends.data.model.ContactDbHelper;
 import com.mtha.findmyfriends.ui.login.LoginActivity;
+import com.mtha.findmyfriends.utils.CheckLocationSetting;
 import com.mtha.findmyfriends.utils.Contants;
 
 import androidx.annotation.NonNull;
@@ -40,33 +43,65 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
 
     AccountAuthParams authParams;
     private static final int REQUEST_CODE_SCAN_ONE = 0X01;
     public static final int DEFAULT_VIEW = 0x22;
     public static final String RESULT = "SCAN_RESULT";
-
+    CheckLocationSetting locationSetting ;
+    ContactDbHelper contactDbHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
+
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_friend, R.id.navigation_add_friend, R.id.navigation_profile)
+                R.id.navigation_home, R.id.navigation_list_friend, R.id.navigation_profile)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+        checkPermissions(MainActivity.this);
+        locationSetting = new CheckLocationSetting(MainActivity.this,getApplicationContext());
+    }
 
+
+    //add
+    private static void checkPermissions(AppCompatActivity activityCompat) {
+        // You must have the ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission. Otherwise, the location service
+        // is unavailable.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            Log.i(Contants.TAG, "android sdk < 28 Q");
+            if (ActivityCompat.checkSelfPermission(activityCompat,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(activityCompat,
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                String[] strings =
+                        {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+                ActivityCompat.requestPermissions(activityCompat, strings, 883);
+            }
+        } else {
+            if (ActivityCompat.checkSelfPermission(activityCompat,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(activityCompat,
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(activityCompat,
+                    "android.permission.ACCESS_BACKGROUND_LOCATION") != PackageManager.PERMISSION_GRANTED) {
+                String[] strings = {android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION, "android.permission.ACCESS_BACKGROUND_LOCATION"};
+                ActivityCompat.requestPermissions(activityCompat, strings, 882);
+            }
+        }
     }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
-        return true;
-    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -76,8 +111,17 @@ public class MainActivity extends AppCompatActivity {
         }
         if(requestCode==DEFAULT_VIEW){
             HmsScanAnalyzerOptions options = new HmsScanAnalyzerOptions.Creator().
-                    setHmsScanTypes(HmsScan.ALL_SCAN_TYPE,HmsScan.CODE128_SCAN_TYPE).create();
+                    setHmsScanTypes(HmsScan.ALL_SCAN_TYPE,HmsScan.QRCODE_SCAN_TYPE).create();
             ScanUtil.startScan(MainActivity.this, REQUEST_CODE_SCAN_ONE, options);
+        }
+        if(requestCode==882 || requestCode==883){
+            if (grantResults.length > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                Log.i("location request", "onRequestPermissionsResult: apply LOCATION PERMISSION successful");
+                locationSetting.requestLocation();
+            } else {
+                Log.i("not permission", "onRequestPermissionsResult: apply LOCATION PERMISSSION  failed");
+            }
         }
     }
 
@@ -98,24 +142,31 @@ public class MainActivity extends AppCompatActivity {
             if (obj != null) {
 
                 //call dialog form
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-               View contactDetail = LayoutInflater.from(this).inflate(R.layout.contact_dialog, null);
-               builder.setView(contactDetail);
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                View contactDetail = LayoutInflater.from(MainActivity.this).inflate(R.layout.contact_dialog, null);
+                builder.setView(contactDetail);
                 EditText etName = (EditText) contactDetail.findViewById(R.id.etName);
                 EditText etPhone = (EditText) contactDetail.findViewById(R.id.etPhone);
                 EditText etEmail = (EditText)contactDetail.findViewById(R.id.etEmail);
-                EditText etAddress = (EditText) contactDetail.findViewById(R.id.etAddress);
-
-
-                etName.setText(obj.getContactDetail().getPeopleName().getFullName());
-                etPhone.setText(obj.getContactDetail().getTelPhoneNumbers().get(0).getTelPhoneNumber());
-                etEmail.setText(obj.getContactDetail().getEmailContents().get(0).getAddressInfo());
-
-                StringBuilder addressBuilder = new StringBuilder();
-                for (String addressLine : obj.getContactDetail().getAddressesInfos().get(0).getAddressDetails()) {
-                    addressBuilder.append(addressLine);
+                EditText etLatitude = (EditText) contactDetail.findViewById(R.id.etLatitude);
+                EditText etLongtitude = (EditText) contactDetail.findViewById(R.id.etLongtitude);
+                ImageView imageView = (ImageView) contactDetail.findViewById(R.id.image);
+                try {
+                    JSONObject jsonObject = new JSONObject( obj.getOriginalValue());
+                    String fullname = jsonObject.getString("fullname");
+                    String email = jsonObject.getString("email");
+                    String phone = jsonObject.getString("phone");
+                    String image = jsonObject.getString("image");
+                    double latitude = jsonObject.getDouble("latitude");
+                    double longtitude = jsonObject.getDouble("longitude");//chinh lai
+                    etName.setText(fullname);
+                    etEmail.setText(email);
+                    etPhone.setText(phone);
+                    etLatitude.setText(latitude+"");
+                    etLongtitude.setText(longtitude+"");
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                etAddress.setText(addressBuilder.toString());
 
                 final AlertDialog dialog = builder.create();
 
@@ -127,13 +178,21 @@ public class MainActivity extends AppCompatActivity {
                         String fullName = etName.getText().toString();
                         String phoneNumb = etPhone.getText().toString();
                         String email = etEmail.getText().toString();
-                        String address = etAddress.getText().toString();
-                        Contact contact = new Contact(fullName,phoneNumb,email,address);
-                        new ContactDbHelper(MainActivity.this).insContact(contact);
+                        double latitude = Double.parseDouble(etLatitude.getText().toString());
+                        double longtitude = Double.parseDouble(etLongtitude.getText().toString());
+                        String image = imageView.getDrawable().toString();
+                        Contact contact = new Contact(fullName,phoneNumb,email,image,latitude,longtitude);
+                        contactDbHelper.insContact(contact);
                         dialog.dismiss();
                     }
                 });
 
+                contactDetail.findViewById(R.id.btnClose).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
                 //tao dialog
                 dialog.show();
 
@@ -143,21 +202,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_qrcode,menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.item_qr_scan:
                 if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
                     ActivityCompat.requestPermissions(
-                            this,
+                            MainActivity.this,
                             new String[]{Manifest.permission.CAMERA, 	Manifest.permission.READ_EXTERNAL_STORAGE},
                             DEFAULT_VIEW);
                 }
-                break;
-            case R.id.item_setting:
-                break;
+                return true;
             case android.R.id.home:
-                onBackPressed();
-                break;
+                MainActivity.this.onBackPressed();
+                return true;
             case R.id.item_signOut:
                 authParams = new AccountAuthParamsHelper(AccountAuthParams.DEFAULT_AUTH_REQUEST_PARAM).
                         setProfile().setAuthorizationCode().createParams();
@@ -179,15 +243,23 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-                break;
+                return true;
             default:
-                break;
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onPostResume() {
+        locationSetting.requestLocationUpdatesWithCallback();
+        super.onPostResume();
+    }
 
-
+    @Override
+    protected void onDestroy() {
+        locationSetting.removeLocationUpdatesWithCallback();
+        super.onDestroy();
+    }
 
     @Override
     public void onBackPressed() {

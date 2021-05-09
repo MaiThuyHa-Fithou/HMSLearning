@@ -1,4 +1,4 @@
-package com.mtha.findmyfriends.ui.addfriend;
+package com.mtha.findmyfriends.ui.listfriend;
 
 import android.app.Activity;
 import android.content.Intent;

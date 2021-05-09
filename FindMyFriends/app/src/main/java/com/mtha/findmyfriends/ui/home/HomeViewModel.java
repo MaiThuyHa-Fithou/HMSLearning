@@ -1,4 +1,4 @@
-package com.mtha.findmyfriends.ui.friends;
+package com.mtha.findmyfriends.ui.home;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -6,11 +6,11 @@ import androidx.lifecycle.ViewModel;
 
 import com.huawei.hms.maps.MapView;
 
-public class FriendsViewModel extends ViewModel {
+public class HomeViewModel extends ViewModel {
 
     private MutableLiveData<MapView> mMap;
 
-    public FriendsViewModel() {
+    public HomeViewModel() {
         mMap = new MutableLiveData<>();
 
     }

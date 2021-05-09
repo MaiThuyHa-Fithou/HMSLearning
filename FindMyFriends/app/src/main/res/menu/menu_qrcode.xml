@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-   >
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/item_setting"
-        android:icon="@drawable/outline_settings_24"
-        android:title="Setting"
+        android:id="@+id/item_qr_scan"
+        android:icon="@drawable/outline_qr_code_scanner_24"
+        android:title="My QRCODE"
         app:showAsAction="always"
-       />
+        />
     <item
         android:id="@+id/item_signOut"
         android:icon="@drawable/outline_logout_24"
         android:title="SignOut"
         app:showAsAction="always"
-       />
+     />
 </menu>

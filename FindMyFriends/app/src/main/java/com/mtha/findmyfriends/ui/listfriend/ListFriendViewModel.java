@@ -1,14 +1,14 @@
-package com.mtha.findmyfriends.ui.addfriend;
+package com.mtha.findmyfriends.ui.listfriend;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class AddFriendViewModel extends ViewModel {
+public class ListFriendViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public AddFriendViewModel() {
+    public ListFriendViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("This is dashboard fragment");
     }

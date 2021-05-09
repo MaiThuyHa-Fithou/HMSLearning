@@ -9,7 +9,12 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class ContactDbHelper extends SQLiteOpenHelper {
     private static final String TAG = "ContactDbHelper";
@@ -30,7 +35,9 @@ public class ContactDbHelper extends SQLiteOpenHelper {
                 "fullname VARCHAR (255) NOT NULL, " +
                 "phoneNumb VARCHAR (255) NOT NULL, " +
                 "email VARCHAR (255) NOT NULL, " +
-                "address VARCHAR (255) NOT NULL " +
+                "image VARCHAR (255) NOT NULL, " +
+                "latitude double,  "+
+                "longtitude double "+
                 ")";
 
         db.execSQL(queryCreateTable);
@@ -45,17 +52,19 @@ public class ContactDbHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public ArrayList<Contact> getAllContacts(){
-        ArrayList<Contact> contacts = new ArrayList<>();
+    public List<Contact> getAllContacts(){
+        List<Contact> contacts = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * from " + TABLE_CONTACT, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()){
-            String fullName = cursor.getString(0);
-            String phoneNumb = cursor.getString(1);
-            String email = cursor.getString(2);
-            String address = cursor.getString(3);
-            contacts.add(new Contact(fullName,phoneNumb,email,address));
+            String fullName = cursor.getString(1);
+            String phoneNumb = cursor.getString(2);
+            String email = cursor.getString(3);
+            String image = cursor.getString(4);
+            double latitude = cursor.getDouble(5);
+            double longtitude = cursor.getDouble(6);
+            contacts.add(new Contact(fullName,phoneNumb,email,image,latitude,longtitude));
             cursor.moveToNext();
         }
         return contacts;
@@ -63,7 +72,34 @@ public class ContactDbHelper extends SQLiteOpenHelper {
 
     public void insContact(Contact contact){
         SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("INSERT INTO " + TABLE_CONTACT + " ( fullname, phoneNumb, email, address ) " +
-                "VALUES (?,?,?,?) " , new String[]{contact.getFullName(), contact.getPhoneNumb(), contact.getEmail(), contact.getAddress()});
+        db.execSQL("INSERT INTO " + TABLE_CONTACT + " ( fullname, phoneNumb, email, image, latitude, longtitude ) " +
+                "VALUES (?,?,?,?,?) " , new String[]{contact.getFullName(), contact.getPhoneNumb(), contact.getEmail(),contact.getImage()
+        ,contact.getLatitude()+"", contact.getLongitude()+""});
+    }
+
+    public JSONArray getJsonContacts() throws JSONException {
+        JSONArray listContacts = new JSONArray();
+        ArrayList<Contact> contacts = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("Select * from " + TABLE_CONTACT, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()){
+            String fullName = cursor.getString(1);
+            String phoneNumb = cursor.getString(2);
+            String email = cursor.getString(3);
+            String image = cursor.getString(4);
+            double latitude = cursor.getDouble(5);
+            double longtitude = cursor.getDouble(6);
+            JSONObject contact = new JSONObject();
+            contact.put("fullname", fullName);
+            contact.put("email", email);
+            contact.put("phone", phoneNumb);
+            contact.put("image", image);
+            contact.put("latitude", latitude);
+            contact.put("longtitude", longtitude);
+            listContacts.put(contact);
+            cursor.moveToNext();
+        }
+        return listContacts;
     }
 }

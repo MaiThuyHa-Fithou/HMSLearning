@@ -7,7 +7,7 @@
     <string name="action_sign_in">Sign in</string>
     <string name="action_register">Register</string>
     <string name="scan_barcode">Scan Barcode</string>
-
+    <string name="title_home">Home</string>
     <string name="title_result">Result</string>
     <string name="code_format">Code Format</string>
     <string name="result_type">Result Type</string>

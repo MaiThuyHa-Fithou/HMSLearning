@@ -1,19 +1,47 @@
 package com.mtha.findmyfriends.data.model;
 
+import com.huawei.hms.maps.model.LatLng;
+
 public class Contact {
     private String fullName;
     private String phoneNumb;
     private String email;
-    private String address;
+    private double latitude, longitude;
+    private String image;
 
     public Contact() {
     }
 
-    public Contact(String fullName, String phoneNumb, String email, String address) {
+    public Contact(String fullName, String phoneNumb, String email) {
         this.fullName = fullName;
         this.phoneNumb = phoneNumb;
         this.email = email;
-        this.address = address;
+
+    }
+
+    public Contact(String fullName, String phoneNumb, String email, double latitude, double longitude) {
+        this.fullName = fullName;
+        this.phoneNumb = phoneNumb;
+        this.email = email;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public Contact(String fullName, String phoneNumb, String email, String image,double latitude, double longitude) {
+        this.fullName = fullName;
+        this.phoneNumb = phoneNumb;
+        this.email = email;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.image = image;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public String getFullName() {
@@ -28,8 +56,12 @@ public class Contact {
         return email;
     }
 
-    public String getAddress() {
-        return address;
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
     }
 
     @Override
@@ -38,7 +70,8 @@ public class Contact {
                 "fullName='" + fullName + '\'' +
                 ", phoneNumb='" + phoneNumb + '\'' +
                 ", email='" + email + '\'' +
-                ", address='" + address + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
                 '}';
     }
 }

@@ -125,7 +125,7 @@ public class ListFriendFragment extends Fragment implements ContactAdapter.Conta
                 return false;
             }
         });
-        super.onCreateOptionsMenu(menu, inflater);
+       // super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override

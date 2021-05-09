@@ -10,9 +10,4 @@
         android:title="Search"
         app:showAsAction="always"
         app:actionViewClass="android.widget.SearchView"/>
-    <item
-        android:id="@+id/item_signOut"
-        android:icon="@drawable/outline_logout_24"
-        android:title="SignOut"
-        app:showAsAction="always" />
 </menu>

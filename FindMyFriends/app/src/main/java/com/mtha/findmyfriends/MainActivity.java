@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.huawei.hmf.tasks.OnCompleteListener;
 import com.huawei.hmf.tasks.Task;
@@ -158,10 +159,11 @@ public class MainActivity extends AppCompatActivity {
                     String phone = jsonObject.getString("phone");
                     String image = jsonObject.getString("image");
                     double latitude = jsonObject.getDouble("latitude");
-                    double longtitude = jsonObject.getDouble("longitude");//chinh lai
+                    double longtitude = jsonObject.getDouble("longtitude");
                     etName.setText(fullname);
                     etEmail.setText(email);
                     etPhone.setText(phone);
+                    Glide.with(MainActivity.this).load(image).into(imageView);
                     etLatitude.setText(latitude+"");
                     etLongtitude.setText(longtitude+"");
                 } catch (JSONException e) {
@@ -180,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                         String email = etEmail.getText().toString();
                         double latitude = Double.parseDouble(etLatitude.getText().toString());
                         double longtitude = Double.parseDouble(etLongtitude.getText().toString());
-                        String image = imageView.getDrawable().toString();
+                        String image = imageView.getTag().toString();
                         Contact contact = new Contact(fullName,phoneNumb,email,image,latitude,longtitude);
                         contactDbHelper.insContact(contact);
                         dialog.dismiss();

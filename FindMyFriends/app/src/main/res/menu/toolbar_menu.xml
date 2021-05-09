@@ -5,9 +5,7 @@
     <item
         android:id="@+id/item_setting"
         android:icon="@drawable/outline_settings_24"
-        android:title="Setting"
-        app:showAsAction="always"
-       />
+        android:title="Setting" />
     <item
         android:id="@+id/item_signOut"
         android:icon="@drawable/outline_logout_24"

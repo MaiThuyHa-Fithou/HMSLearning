@@ -80,15 +80,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             appCompatActivity=(AppCompatActivity)context;
     }
 
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar_menu,menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
+
     private void getViews(View root){
         mFullName = root.findViewById(R.id.fullName);
         mEmail = root.findViewById(R.id.email);
@@ -118,6 +110,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         String fullname = mFullName.getText().toString();
         String phone = mPhone.getText().toString();
         String email = mEmail.getText().toString();
+        String img = changAvatar.getTag().toString();
         final Contact[] contact = {null};
         FusedLocationProviderClient fusedLocationProviderClient = LocationServices
                 .getFusedLocationProviderClient(appCompatActivity);
@@ -128,7 +121,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                         if (location == null) {
                             return;
                         }
-                        contact[0] = new Contact(fullname,phone,email,location.getLatitude(),location.getLongitude());
+                        contact[0] = new Contact(fullname,phone,email,img,location.getLatitude(),location.getLongitude());
                         Toast.makeText(appCompatActivity, contact[0].toString()
                                 , Toast.LENGTH_SHORT).show();
                         JSONObject userObj = new JSONObject();
@@ -136,6 +129,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                             userObj.put("fullname", fullname);
                             userObj.put("email", email);
                             userObj.put("phone", phone);
+                            userObj.put("image", img);
                             userObj.put("latitude", location.getLatitude());
                             userObj.put("longtitude", location.getLongitude());
                         } catch (JSONException e) {

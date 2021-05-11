@@ -100,7 +100,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             btnInfo = itemView.findViewById(R.id.btnInfo);
             btnCall = itemView.findViewById(R.id.btnCall);
             btnChat = itemView.findViewById(R.id.btnChat);
-            img = itemView.findViewById(R.id.imageView);
+            img = itemView.findViewById(R.id.imgPerson);
             //xu ly su kien o day
             btnChat.setOnClickListener(this);
             btnInfo.setOnClickListener(this);
@@ -123,6 +123,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 case R.id.btnCall:
                     break;
                 case R.id.btnChat:
+                    Toast.makeText(context,"Chat Info", Toast.LENGTH_LONG).show();
                     break;
             }
 

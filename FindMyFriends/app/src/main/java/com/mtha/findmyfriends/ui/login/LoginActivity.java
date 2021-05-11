@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import com.huawei.hms.support.account.result.AuthAccount;
 import com.huawei.hms.support.account.service.AccountAuthService;
 import com.mtha.findmyfriends.MainActivity;
 import com.mtha.findmyfriends.R;
+import com.mtha.findmyfriends.ui.register.UserRegisterActivity;
 import com.mtha.findmyfriends.utils.Contants;
 
 import java.io.Serializable;
@@ -30,6 +32,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     AccountAuthParams authParams;
     AccountAuthService authService;
+    TextView txtUserRegister;
+    final static int CREATE_USER=101;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,10 +54,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.login:
-                signInID();
-                break;
-            case R.id.register:
+            case R.id.createnewac:
+                Intent intent = new Intent(LoginActivity.this, UserRegisterActivity.class);
+                startActivityForResult(intent,CREATE_USER);
                 break;
         }
 
@@ -83,9 +86,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void getViews(){
-
-        findViewById(R.id.register).setOnClickListener(this);
-        findViewById(R.id.login).setOnClickListener(this);
+            txtUserRegister = findViewById(R.id.createnewac);
+            txtUserRegister.setOnClickListener(this);
     }
 
 

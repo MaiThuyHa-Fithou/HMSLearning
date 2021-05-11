@@ -68,8 +68,8 @@ public class ListFriendFragment extends Fragment implements ContactAdapter.Conta
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(root.getContext());
         recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.addItemDecoration(new MyDividerItemDecoration(root.getContext(), DividerItemDecoration.VERTICAL, 10));
+       // recyclerView.setItemAnimator(new DefaultItemAnimator());
+    //    recyclerView.addItemDecoration(new MyDividerItemDecoration(root.getContext(), DividerItemDecoration.VERTICAL, 10));
         contactDbHelper = new ContactDbHelper(appCompatActivity);
         listContact = new ArrayList<>();
         contactAdapter = new ContactAdapter(appCompatActivity,listContact,this);

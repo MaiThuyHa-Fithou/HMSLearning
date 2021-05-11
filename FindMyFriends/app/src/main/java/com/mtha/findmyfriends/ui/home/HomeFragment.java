@@ -37,6 +37,11 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.huawei.hmf.tasks.OnCompleteListener;
 import com.huawei.hmf.tasks.OnFailureListener;
 import com.huawei.hmf.tasks.OnSuccessListener;
@@ -72,6 +77,7 @@ import com.mtha.findmyfriends.ui.login.LoginActivity;
 import com.mtha.findmyfriends.utils.CheckLocationSetting;
 import com.mtha.findmyfriends.utils.Contants;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,9 +93,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private HomeViewModel friendsViewModel;
     private final static String MAPVIEW_BUNDLE_KEY = "mapview";
     private FusedLocationProviderClient fusedLocationProviderClient;
-    ContactDbHelper contactDbHelper;
+
     CheckLocationSetting checkLocationSetting;
 
+    FirebaseDatabase database;
+    DatabaseReference reference;
 
     //custom marker
     private final static String ImageUrl = "https://png.pngtree.com/png-clipart/20190924/original/pngtree-businessman-user-avatar-free-vector-png-image_4827807.jpg";
@@ -108,7 +116,29 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         checkLocationSetting = new CheckLocationSetting(appCompatActivity,appCompatActivity.getApplicationContext());
         checkLocationSetting.requestLocation();
         initViews(root, savedInstanceState);
-        contactDbHelper = new ContactDbHelper(appCompatActivity);
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference();
+       /* reference.child("users").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+
+                for (DataSnapshot data: snapshot.getChildren()) {
+                    Contact contact = data.getValue(Contact.class);
+                    mHuaweiMap.addMarker(new MarkerOptions()
+                            .title(contact.getFullName())
+                            .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomMarkerView, R.drawable.avatar)))
+                            .position(new LatLng(
+                                    contact.getLatitude(),
+                                    contact.getLongitude()
+                            ))
+                    );
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+                Log.w("TAG", "loadPost:onCancelled", error.toException());
+            }
+        });*/
         return root;
     }
 
@@ -156,7 +186,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     public void onFailure(Exception e) {
                     }
                 });
-           createMarkersFromJson();
+          createMarkersFromJson();
         } catch (Exception e) {
             Log.d("last Location ", e.getMessage());
         }
@@ -219,21 +249,28 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private void createMarkersFromJson() throws JSONException {
         // De-serialize the JSON string into an array of city objects
 
-        JSONArray jsonArray = contactDbHelper.getJsonContacts();
-        Toast.makeText(appCompatActivity, ""+jsonArray.getJSONObject(0).getString("fullname"), Toast.LENGTH_SHORT).show();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            // Create a marker for each city in the JSON data.
-            JSONObject jsonObj = jsonArray.getJSONObject(i);
-            Log.d(Contants.TAG, jsonObj.getString("fullname"));
-            mHuaweiMap.addMarker(new MarkerOptions()
-                    .title(jsonObj.getString("fullname"))
-                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomMarkerView, R.drawable.avatar)))
-                    .position(new LatLng(
-                            jsonObj.getDouble("latitude"),
-                            jsonObj.getDouble("longtitude")
-                    ))
-            );
-        }
+        reference.child("users").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+
+                for (DataSnapshot data: snapshot.getChildren()) {
+                    Contact contact = data.getValue(Contact.class);
+                    mHuaweiMap.addMarker(new MarkerOptions()
+                            .title(contact.getFullName())
+                            .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomMarkerView, R.drawable.avatar)))
+                            .position(new LatLng(
+                                    contact.getLatitude(),
+                                    contact.getLongitude()
+                            ))
+                    );
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+                Log.w("TAG", "loadPost:onCancelled", error.toException());
+            }
+        });
+
     }
     private Bitmap getMarkerBitmapFromView(View view, Bitmap bitmap) {
 

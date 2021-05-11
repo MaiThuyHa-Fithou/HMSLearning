@@ -75,7 +75,7 @@ public class ContactDbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("INSERT INTO " + TABLE_CONTACT + " ( fullname, phoneNumb, email, image, latitude, longtitude ) " +
                 "VALUES (?,?,?,?,?,?) " , new String[]{contact.getFullName(),
-                contact.getPhoneNumb(), contact.getEmail(),contact.getImage()
+                contact.getPhone(), contact.getEmail(),contact.getImage()
         ,contact.getLatitude()+"", contact.getLongitude()+""});
     }
 

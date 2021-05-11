@@ -3,8 +3,9 @@ package com.mtha.findmyfriends.data.model;
 import com.huawei.hms.maps.model.LatLng;
 
 public class Contact {
+
     private String fullName;
-    private String phoneNumb;
+    private String phone;
     private String email;
     private double latitude, longitude;
     private String image;
@@ -14,14 +15,14 @@ public class Contact {
 
     public Contact(String fullName, String phoneNumb, String email) {
         this.fullName = fullName;
-        this.phoneNumb = phoneNumb;
+        this.phone = phoneNumb;
         this.email = email;
 
     }
 
     public Contact(String fullName, String phoneNumb, String email, double latitude, double longitude) {
         this.fullName = fullName;
-        this.phoneNumb = phoneNumb;
+        this.phone = phoneNumb;
         this.email = email;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -29,7 +30,7 @@ public class Contact {
 
     public Contact(String fullName, String phoneNumb, String email, String image,double latitude, double longitude) {
         this.fullName = fullName;
-        this.phoneNumb = phoneNumb;
+        this.phone = phoneNumb;
         this.email = email;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -48,8 +49,8 @@ public class Contact {
         return fullName;
     }
 
-    public String getPhoneNumb() {
-        return phoneNumb;
+    public String getPhone() {
+        return phone;
     }
 
     public String getEmail() {
@@ -68,7 +69,7 @@ public class Contact {
     public String toString() {
         return "Contact{" +
                 "fullName='" + fullName + '\'' +
-                ", phoneNumb='" + phoneNumb + '\'' +
+                ", phoneNumb='" + phone + '\'' +
                 ", email='" + email + '\'' +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +

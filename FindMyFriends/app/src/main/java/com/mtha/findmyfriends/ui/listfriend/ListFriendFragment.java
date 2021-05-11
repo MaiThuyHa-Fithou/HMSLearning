@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -15,8 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -26,30 +23,30 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.mtha.findmyfriends.R;
 import com.mtha.findmyfriends.data.model.Contact;
 import com.mtha.findmyfriends.data.model.ContactAdapter;
-import com.mtha.findmyfriends.data.model.ContactDbHelper;
-import com.mtha.findmyfriends.data.model.MyDividerItemDecoration;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
-public class ListFriendFragment extends Fragment implements ContactAdapter.ContactAdapterListener {
+public class ListFriendFragment extends Fragment  {
     private AppCompatActivity appCompatActivity;
     private ListFriendViewModel addFriendViewModel;
-    List<Contact> listContact;
+    ArrayList<Contact> listContact = new ArrayList<>();
+    FirebaseDatabase database;
+    DatabaseReference reference;
 
-
-    ContactDbHelper contactDbHelper;
-    RecyclerView recyclerView ;
+    ListView lvContact;
     ContactAdapter contactAdapter;
 
     SearchView searchView;
@@ -62,25 +59,28 @@ public class ListFriendFragment extends Fragment implements ContactAdapter.Conta
         
         //add back button on ActionBar
         appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        recyclerView = root.findViewById(R.id.listViewContact);
-        // white background notification bar
-     //   whiteNotificationBar(recyclerView);
+        //firebase
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference();
+        reference.child("users").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                for (DataSnapshot data: snapshot.getChildren()) {
+                    Contact contact = data.getValue(Contact.class);
+                    listContact.add(contact);
+                    Toast.makeText(appCompatActivity, ""+contact.getFullName(), Toast.LENGTH_SHORT).show();
+                }
+            }
 
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(root.getContext());
-        recyclerView.setLayoutManager(mLayoutManager);
-       // recyclerView.setItemAnimator(new DefaultItemAnimator());
-    //    recyclerView.addItemDecoration(new MyDividerItemDecoration(root.getContext(), DividerItemDecoration.VERTICAL, 10));
-        contactDbHelper = new ContactDbHelper(appCompatActivity);
-        listContact = new ArrayList<>();
-        contactAdapter = new ContactAdapter(appCompatActivity,listContact,this);
-        recyclerView.setAdapter(contactAdapter);
-        getContactListView();
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+                Log.w("TAG", "loadPost:onCancelled", error.toException());
+            }
+        });
+        lvContact = root.findViewById(R.id.lvContact);
+        contactAdapter = new ContactAdapter(appCompatActivity,listContact,R.layout.item_contact);
+        lvContact.setAdapter(contactAdapter);
         return root;
-    }
-    private void getContactListView(){
-        listContact.clear();
-        listContact.addAll(contactDbHelper.getAllContacts());
-        contactAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -95,14 +95,6 @@ public class ListFriendFragment extends Fragment implements ContactAdapter.Conta
 
     }
 
-    private void whiteNotificationBar(View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            int flags = view.getSystemUiVisibility();
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            view.setSystemUiVisibility(flags);
-            appCompatActivity.getWindow().setStatusBarColor(Color.WHITE);
-        }
-    }
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.menu_search,menu);
@@ -144,8 +136,4 @@ public class ListFriendFragment extends Fragment implements ContactAdapter.Conta
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onContactSelected(Contact contact) {
-        Toast.makeText(appCompatActivity, "Selected: " + contact.getFullName() + ", " + contact.getPhoneNumb(), Toast.LENGTH_LONG).show();
-    }
 }

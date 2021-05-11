@@ -29,6 +29,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.huawei.hmf.tasks.OnFailureListener;
 import com.huawei.hmf.tasks.OnSuccessListener;
 import com.huawei.hmf.tasks.Task;
@@ -51,6 +53,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
@@ -97,6 +101,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.btnEdit:
+                Contact contact = new Contact("Duc Son","09876543234","son@gmail.com"
+                ,"avatar.jpg", 1.290270,103.851959);
+                updContactDB(contact);
                 break;
             case R.id.btnGenQR:
                 myQRCode();
@@ -104,6 +111,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             case R.id.changeAvatar:
                 break;
         }
+    }
+
+    private void updContactDB(Contact contact){
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        DatabaseReference reference = firebaseDatabase.getReference();
+        String uid = reference.push().getKey();
+        reference.child("users").child(uid).setValue(contact);
     }
 
     private void myQRCode(){

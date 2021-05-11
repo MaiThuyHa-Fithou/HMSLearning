@@ -17,6 +17,8 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.huawei.hmf.tasks.OnCompleteListener;
 import com.huawei.hmf.tasks.Task;
 import com.huawei.hms.common.ApiException;
@@ -47,6 +49,9 @@ import androidx.navigation.ui.NavigationUI;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
 
     AccountAuthParams authParams;
@@ -54,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int DEFAULT_VIEW = 0x22;
     public static final String RESULT = "SCAN_RESULT";
     CheckLocationSetting locationSetting ;
-    ContactDbHelper contactDbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
         checkPermissions(MainActivity.this);
         locationSetting = new CheckLocationSetting(MainActivity.this,getApplicationContext());
-        contactDbHelper = new ContactDbHelper(MainActivity.this);
+
     }
 
 
@@ -155,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 ImageView imageView = (ImageView) contactDetail.findViewById(R.id.image);
                 try {
                     JSONObject jsonObject = new JSONObject( obj.getOriginalValue());
-                    String fullname = jsonObject.getString("fullname");
+                    String fullname = jsonObject.getString("fullName");
                     String email = jsonObject.getString("email");
                     String phone = jsonObject.getString("phone");
                     String image = jsonObject.getString("image");
@@ -185,7 +190,9 @@ public class MainActivity extends AppCompatActivity {
                         double longtitude = Double.parseDouble(etLongtitude.getText().toString());
                         String image = imageView.getTag().toString();
                         Contact contact = new Contact(fullName,phoneNumb,email,image,latitude,longtitude);
-                        contactDbHelper.insContact(contact);
+                        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+                        String uid = reference.push().getKey();
+                        reference.child("users").child(uid).setValue(contact);
                         dialog.dismiss();
                     }
                 });

@@ -22,6 +22,7 @@ public class UserRegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(UserRegisterActivity.this, MainActivity.class));
+           //     UserRegisterActivity.this.finish();
             }
         });
 

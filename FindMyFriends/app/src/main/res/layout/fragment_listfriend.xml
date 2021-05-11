@@ -5,9 +5,8 @@
     android:layout_height="match_parent"
     tools:context=".ui.listfriend.ListFriendFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listViewContact"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-      />
+   <ListView
+       android:id="@+id/lvContact"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"></ListView>
 </RelativeLayout>

@@ -57,6 +57,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.createnewac:
                 Intent intent = new Intent(LoginActivity.this, UserRegisterActivity.class);
                 startActivityForResult(intent,CREATE_USER);
+             //   this.finish();
                 break;
         }
 

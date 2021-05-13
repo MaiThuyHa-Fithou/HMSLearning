@@ -3,17 +3,23 @@ package com.mtha.findmyfriends.ui.login;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.res.ResourcesCompat;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.huawei.hmf.tasks.Task;
 import com.huawei.hms.common.ApiException;
 import com.huawei.hms.support.account.AccountAuthManager;
@@ -33,12 +39,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     AccountAuthParams authParams;
     AccountAuthService authService;
     TextView txtUserRegister;
+    Button btnLogin;
     final static int CREATE_USER=101;
+    private static int SPLASH_TIME_OUT = 3000;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         getViews();
+
+
+        ////////////////////////////////////////////////////////////////////////////
+        // We use the Yoyo to make our app logo to bounce app and down.
+        //There is a lot of Attension Techniques styles
+        // example Flash, Pulse, RubberBand, Shake, Swing, Wobble, Bounce, Tada, StandUp, Wave.
+        // Your can change the techniques to fit your liking.
+
+        YoYo.with(Techniques.Bounce)
+                .duration(7000) // Time it for logo takes to bounce up and down
+                .playOn(findViewById(R.id.logo));
+        /////////////////////////////////////////////////////////////////////////////
+
+
 
     }
 
@@ -57,7 +79,24 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.createnewac:
                 Intent intent = new Intent(LoginActivity.this, UserRegisterActivity.class);
                 startActivityForResult(intent,CREATE_USER);
-             //   this.finish();
+                this.finish();
+                break;
+            case R.id.btnLogin:
+                new Handler().postDelayed(new Runnable() {
+
+                    /*
+                     * Showing splash screen with a timer. This will be useful when you
+                     * want to show case your app logo / company
+                     */
+
+                    @Override
+                    public void run() {
+                        // This method will be executed once the timer is over
+                        // Start your app main activity
+                        startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                        finish();
+                    }
+                }, SPLASH_TIME_OUT);
                 break;
         }
 
@@ -89,6 +128,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void getViews(){
             txtUserRegister = findViewById(R.id.createnewac);
             txtUserRegister.setOnClickListener(this);
+            btnLogin = findViewById(R.id.btnLogin);
+            btnLogin.setOnClickListener(this);
     }
 
 

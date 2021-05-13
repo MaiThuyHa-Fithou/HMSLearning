@@ -17,21 +17,12 @@
         android:background="@drawable/header_bg">
 
     </View>
-    <TextView
-        android:layout_marginTop="35dp"
-        android:textColor="@color/white"
-        android:textSize="25sp"
-        android:textAlignment="center"
-        android:text="Find My Friends"
-        android:textStyle="bold"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/header_view"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:orientation="vertical">
         <include layout="@layout/loginform"/>
 
@@ -49,5 +40,16 @@
             android:layout_height="150dp"
             android:background="@drawable/bottom_bg"/>
     </LinearLayout>
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/animation_view"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:lottie_fileName="splash.json"
+        app:lottie_loop="true"
+        app:lottie_autoPlay="true"
+        android:layout_gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"/>
 
 </RelativeLayout>

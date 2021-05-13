@@ -1,26 +1,7 @@
 <resources>
     <string name="app_name">Find My Friends</string>
     <string name="title_friend">Friends</string>
-    <string name="title_add_friend">Add friend</string>
     <string name="title_profile">Profile</string>
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="action_sign_in">Sign in</string>
-    <string name="action_register">Register</string>
-    <string name="scan_barcode">Scan Barcode</string>
     <string name="title_home">Home</string>
-    <string name="title_result">Result</string>
-    <string name="code_format">Code Format</string>
-    <string name="result_type">Result Type</string>
-    <string name="result_content">Result</string>
 
-    <string name="copy">Copy</string>
-    <string name="add_contact">Add Contact</string>
-    <string name="connect_network">Connet to network</string>
-    <string name="add_calendar">Add to calendar</string>
-    <string name="send_sms">Send SMS</string>
-    <string name="call">Call</string>
-    <string name="nivigation">Nivigation</string>
-    <string name="send_email">Send Email</string>
-    <string name="copy_toast">Content has been copied</string>
-    <string name="open_browser">Open in browser</string>
 </resources>

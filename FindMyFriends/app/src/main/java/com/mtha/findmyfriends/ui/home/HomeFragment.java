@@ -118,27 +118,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         initViews(root, savedInstanceState);
         database = FirebaseDatabase.getInstance();
         reference = database.getReference();
-       /* reference.child("users").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-
-                for (DataSnapshot data: snapshot.getChildren()) {
-                    Contact contact = data.getValue(Contact.class);
-                    mHuaweiMap.addMarker(new MarkerOptions()
-                            .title(contact.getFullName())
-                            .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomMarkerView, R.drawable.avatar)))
-                            .position(new LatLng(
-                                    contact.getLatitude(),
-                                    contact.getLongitude()
-                            ))
-                    );
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull @NotNull DatabaseError error) {
-                Log.w("TAG", "loadPost:onCancelled", error.toException());
-            }
-        });*/
         return root;
     }
 

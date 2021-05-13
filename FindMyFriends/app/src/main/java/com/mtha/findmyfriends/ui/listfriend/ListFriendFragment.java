@@ -13,6 +13,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -20,11 +22,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.ListFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -37,14 +42,15 @@ import com.mtha.findmyfriends.data.model.ContactAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 
 public class ListFriendFragment extends Fragment  {
     private AppCompatActivity appCompatActivity;
     private ListFriendViewModel addFriendViewModel;
     ArrayList<Contact> listContact = new ArrayList<>();
-    FirebaseDatabase database;
-    DatabaseReference reference;
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference reference = database.getReference();
 
     ListView lvContact;
     ContactAdapter contactAdapter;
@@ -59,27 +65,8 @@ public class ListFriendFragment extends Fragment  {
         
         //add back button on ActionBar
         appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //firebase
-        database = FirebaseDatabase.getInstance();
-        reference = database.getReference();
-        reference.child("users").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                for (DataSnapshot data: snapshot.getChildren()) {
-                    Contact contact = data.getValue(Contact.class);
-                    listContact.add(contact);
-                    Toast.makeText(appCompatActivity, ""+contact.getFullName(), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull @NotNull DatabaseError error) {
-                Log.w("TAG", "loadPost:onCancelled", error.toException());
-            }
-        });
         lvContact = root.findViewById(R.id.lvContact);
-        contactAdapter = new ContactAdapter(appCompatActivity,listContact,R.layout.item_contact);
-        lvContact.setAdapter(contactAdapter);
+        loadData(root);
         return root;
     }
 
@@ -93,6 +80,27 @@ public class ListFriendFragment extends Fragment  {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+    }
+
+    private void loadData(View view){
+        reference.child("users").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                Iterable<DataSnapshot> data = snapshot.getChildren();
+                Iterator<DataSnapshot> ls = data.iterator();
+                while (ls.hasNext()){
+                    Contact contact = ls.next().getValue(Contact.class);
+                    listContact.add(contact);
+                }
+                contactAdapter=new ContactAdapter(view.getContext(),listContact,R.layout.item_contact);
+                lvContact.setAdapter(contactAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override
@@ -109,14 +117,14 @@ public class ListFriendFragment extends Fragment  {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
-                contactAdapter.getFilter().filter(query);
+           //     contactAdapter.getFilter().filter(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
-                contactAdapter.getFilter().filter(query);
+            //    contactAdapter.getFilter().filter(query);
                 return false;
             }
         });
@@ -135,5 +143,6 @@ public class ListFriendFragment extends Fragment  {
         searchView.setOnQueryTextListener(queryTextListener);
         return super.onOptionsItemSelected(item);
     }
+
 
 }

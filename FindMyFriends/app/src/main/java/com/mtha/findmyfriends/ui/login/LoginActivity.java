@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.google.firebase.database.DataSnapshot;
@@ -52,6 +53,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -67,7 +70,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     DatabaseReference reference;
     //silenty signIn
     AccountAuthParams authParams;
-
+    LottieAnimationView animation_view;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,26 +94,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         authParams = new AccountAuthParamsHelper(AccountAuthParams.DEFAULT_AUTH_REQUEST_PARAM).createParams();
 
-    }
-
-    private void silentySignIn(){
-        AccountAuthService service = AccountAuthManager.getService(LoginActivity.this, authParams);
-        Task<AuthAccount> task = service.silentSignIn();
-        task.addOnSuccessListener(new OnSuccessListener<AuthAccount>() {
-            @Override
-            public void onSuccess(AuthAccount authAccount) {
-
-            }
-        });
-       Task <AGConnectAuth> task1 = service.silentSignIn().continueWith(new Continuation<AuthAccount, AGConnectAuth>() {
-           @Override
-           public AGConnectAuth then(Task<AuthAccount> task) throws Exception {
-               return null;
-           }
-       });
 
     }
-
 
     private void signInID(String email, String password){
 
@@ -148,13 +133,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                    email = txtEmail.getText().toString();
                    password = txtPassword.getText().toString();
                 }
-
-                if(user!=null){
+                signInID(email, password);
+               /* if(user!=null){
                     callMainActivity(user.getUid());
                 }else {
                     signInID(email, password);
                 }
-
+*/
                 break;
         }
 
@@ -188,6 +173,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             txtUserRegister.setOnClickListener(this);
             btnLogin = findViewById(R.id.btnLogin);
             btnLogin.setOnClickListener(this);
+            animation_view = findViewById(R.id.animation_view);
     }
 
 

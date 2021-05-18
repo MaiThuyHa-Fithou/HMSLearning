@@ -35,6 +35,7 @@ import com.mtha.findmyfriends.data.model.Contact;
 import com.mtha.findmyfriends.data.model.ContactDbHelper;
 import com.mtha.findmyfriends.ui.login.LoginActivity;
 
+import com.mtha.findmyfriends.ui.login.SplashActivity;
 import com.mtha.findmyfriends.utils.Contants;
 
 import androidx.annotation.NonNull;
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
                 //todo something
                 AGConnectAuth.getInstance().signOut();
                 //call login form
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                startActivity(new Intent(MainActivity.this, SplashActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

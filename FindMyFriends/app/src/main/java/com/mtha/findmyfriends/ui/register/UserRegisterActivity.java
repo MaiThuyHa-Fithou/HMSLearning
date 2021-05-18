@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.huawei.agconnect.auth.AGConnectAuth;
+import com.huawei.agconnect.auth.AGConnectUser;
 import com.huawei.agconnect.auth.EmailUser;
 import com.huawei.agconnect.auth.SignInResult;
 import com.huawei.agconnect.auth.VerifyCodeResult;
@@ -31,7 +32,7 @@ import java.util.Locale;
 import static com.huawei.agconnect.auth.VerifyCodeSettings.ACTION_REGISTER_LOGIN;
 
 public class UserRegisterActivity extends AppCompatActivity implements View.OnClickListener {
-    private AGConnectAuth huaweiAuth = AGConnectAuth.getInstance();
+    private AGConnectAuth huaweiAuth;
     Button btnRegister, btnClose, btnVerify;
     EditText editFullName, editPhone, editVerifyCode, editPassword, editEmail, editConfirmPwd;
     private String email;
@@ -40,7 +41,8 @@ public class UserRegisterActivity extends AppCompatActivity implements View.OnCl
     private String confirmPassword;
     private String verCode;
     private String phone;
-
+    AGConnectUser user;
+    String userID;
     private String uid="";
 
     @Override
@@ -48,7 +50,7 @@ public class UserRegisterActivity extends AppCompatActivity implements View.OnCl
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_register);
         getViews();
-
+        huaweiAuth = AGConnectAuth.getInstance();
     }
 
     private void getViews() {
@@ -134,14 +136,16 @@ public class UserRegisterActivity extends AppCompatActivity implements View.OnCl
                         @Override
                         public void onComplete(Task<SignInResult> task) {
                             if (task.isSuccessful()) {
+                                user = AGConnectAuth.getInstance().getCurrentUser();
+                                userID = user.getUid();
                                 //insert in realtime db firebase
                                 Contact contact = new Contact(name,phone,email,"avatar.jpg",0,0);
-                                insContactDB(contact);
+                                insContactDB(contact, userID);
                                 //call back login form
                                 Intent intent = new Intent();
-                                intent.putExtra("uid", uid);
+                                intent.putExtra("uid", userID);
                                 intent.putExtra("email", email);
-                                intent.putExtra("pwd", password);
+                                intent.putExtra("password", password);
                                 setResult(RESULT_OK, intent);
                                 finish();//close signup form
 
@@ -159,11 +163,11 @@ public class UserRegisterActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    private void insContactDB(Contact contact){
+    private void insContactDB(Contact contact, String userID){
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference reference = database.getReference();
-        uid = reference.push().getKey();
-        reference.child("users").child(uid).setValue(contact);
+       // uid = reference.push().getKey();
+        reference.child("users").child(userID).setValue(contact);
 
     }
 }

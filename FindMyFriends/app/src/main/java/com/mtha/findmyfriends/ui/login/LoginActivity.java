@@ -12,7 +12,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -20,6 +22,20 @@ import androidx.core.content.res.ResourcesCompat;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.huawei.agconnect.auth.AGConnectAuth;
+import com.huawei.agconnect.auth.AGConnectAuthCredential;
+import com.huawei.agconnect.auth.AGConnectUser;
+import com.huawei.agconnect.auth.EmailAuthProvider;
+import com.huawei.agconnect.auth.SignInResult;
+import com.huawei.hmf.tasks.Continuation;
+import com.huawei.hmf.tasks.OnFailureListener;
+import com.huawei.hmf.tasks.OnSuccessListener;
 import com.huawei.hmf.tasks.Task;
 import com.huawei.hms.common.ApiException;
 import com.huawei.hms.support.account.AccountAuthManager;
@@ -32,22 +48,32 @@ import com.mtha.findmyfriends.R;
 import com.mtha.findmyfriends.ui.register.UserRegisterActivity;
 import com.mtha.findmyfriends.utils.Contants;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
+import java.util.Iterator;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
-    AccountAuthParams authParams;
-    AccountAuthService authService;
+    AGConnectUser user;
+    String userID;
     TextView txtUserRegister;
+    EditText txtEmail, txtPassword;
     Button btnLogin;
+    String email="", password="", uid ="";
     final static int CREATE_USER=101;
     private static int SPLASH_TIME_OUT = 3000;
+    FirebaseDatabase database;
+    DatabaseReference reference;
+    //silenty signIn
+    AccountAuthParams authParams;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         getViews();
-
+        user = AGConnectAuth.getInstance().getCurrentUser();
 
         ////////////////////////////////////////////////////////////////////////////
         // We use the Yoyo to make our app logo to bounce app and down.
@@ -59,17 +85,53 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 .duration(7000) // Time it for logo takes to bounce up and down
                 .playOn(findViewById(R.id.logo));
         /////////////////////////////////////////////////////////////////////////////
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference().child("users");
+        //silent signIn
 
-
+        authParams = new AccountAuthParamsHelper(AccountAuthParams.DEFAULT_AUTH_REQUEST_PARAM).createParams();
 
     }
 
-    private void signInID(){
-        authParams = new AccountAuthParamsHelper(AccountAuthParams.DEFAULT_AUTH_REQUEST_PARAM)
-                .setAuthorizationCode()
-                .createParams();
-        authService = AccountAuthManager.getService(LoginActivity.this,authParams);
-        startActivityForResult(authService.getSignInIntent(), Contants.SIGN_IN_ID);
+    private void silentySignIn(){
+        AccountAuthService service = AccountAuthManager.getService(LoginActivity.this, authParams);
+        Task<AuthAccount> task = service.silentSignIn();
+        task.addOnSuccessListener(new OnSuccessListener<AuthAccount>() {
+            @Override
+            public void onSuccess(AuthAccount authAccount) {
+
+            }
+        });
+       Task <AGConnectAuth> task1 = service.silentSignIn().continueWith(new Continuation<AuthAccount, AGConnectAuth>() {
+           @Override
+           public AGConnectAuth then(Task<AuthAccount> task) throws Exception {
+               return null;
+           }
+       });
+
+    }
+
+
+    private void signInID(String email, String password){
+
+        AGConnectAuthCredential credential = EmailAuthProvider.credentialWithPassword(email, password);
+        AGConnectAuth.getInstance().signIn(credential)
+                .addOnSuccessListener(new OnSuccessListener<SignInResult>() {
+                    @Override
+                    public void onSuccess(SignInResult signInResult) {
+                        // Obtain sign-in information.
+
+                        user =AGConnectAuth.getInstance().getCurrentUser();
+                        userID = user.getUid();
+                        callMainActivity(userID);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("login error: ", e.getMessage());
+                    }
+                });
 
 
     }
@@ -82,50 +144,46 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 this.finish();
                 break;
             case R.id.btnLogin:
-                new Handler().postDelayed(new Runnable() {
+                if(email==""|| email==null){
+                   email = txtEmail.getText().toString();
+                   password = txtPassword.getText().toString();
+                }
 
-                    /*
-                     * Showing splash screen with a timer. This will be useful when you
-                     * want to show case your app logo / company
-                     */
+                if(user!=null){
+                    callMainActivity(user.getUid());
+                }else {
+                    signInID(email, password);
+                }
 
-                    @Override
-                    public void run() {
-                        // This method will be executed once the timer is over
-                        // Start your app main activity
-                        startActivity(new Intent(LoginActivity.this,MainActivity.class));
-                        finish();
-                    }
-                }, SPLASH_TIME_OUT);
                 break;
         }
 
     }
 
+    private void callMainActivity(String userID){
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent1 = new Intent(LoginActivity.this,MainActivity.class);
+                startActivity(intent1);
+                finish();
+            }
+        }, SPLASH_TIME_OUT);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==Contants.SIGN_IN_ID){
-            Task<AuthAccount> authAccountTask = AccountAuthManager.parseAuthResultFromIntent(data);
-            //check login success or not
-            if(authAccountTask.isSuccessful()){
-                //call MainActivity class
-                AuthAccount authAccount = authAccountTask.getResult();
-
-                Intent intent = new Intent();
-                intent.putExtra("isCheck",authAccount.isExpired());
-                setResult(RESULT_OK,intent);
-                Log.e(Contants.TAG, "serverAuthCode:" + authAccount.getAuthorizationCode());
-                Log.e(Contants.TAG, "serverAuthCode:" + authAccount.getDisplayName());
-                this.finish();
-            }else {
-                Log.e(Contants.TAG, "sign in failed : " +((ApiException) authAccountTask.getException())
-                        .getStatusCode());
-            }
+        if(requestCode==CREATE_USER && resultCode==RESULT_OK){
+            uid = data.getStringExtra("uid");
+            email = data.getStringExtra("email");
+            password = data.getStringExtra("password");
         }
     }
 
     private void getViews(){
+            txtEmail = findViewById(R.id.loginEmail);
+            txtPassword = findViewById(R.id.loginPassword);
             txtUserRegister = findViewById(R.id.createnewac);
             txtUserRegister.setOnClickListener(this);
             btnLogin = findViewById(R.id.btnLogin);

@@ -29,8 +29,14 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.huawei.agconnect.auth.AGConnectAuth;
+import com.huawei.agconnect.auth.AGConnectUser;
 import com.huawei.hmf.tasks.OnFailureListener;
 import com.huawei.hmf.tasks.OnSuccessListener;
 import com.huawei.hmf.tasks.Task;
@@ -47,6 +53,7 @@ import com.mtha.findmyfriends.data.model.Contact;
 import com.mtha.findmyfriends.utils.CheckLocationSetting;
 import com.mtha.findmyfriends.utils.ImageSaver;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -61,9 +68,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private AppCompatActivity appCompatActivity;
     private ProfileViewModel profileViewModel;
     private Bitmap resultBitmap;
-    CheckLocationSetting setting ;
+
     EditText mFullName, mEmail, mPhone;
     ImageView btnEdit, btnGenQRCode, changAvatar;
+    AGConnectUser user;
+    String uid;
+    FirebaseDatabase database;
+    DatabaseReference reference;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -73,8 +84,16 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
        getViews(root);
         appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setting = new CheckLocationSetting(appCompatActivity,appCompatActivity.getApplicationContext());
-        setting.requestLocation();
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference();
+
+        user = AGConnectAuth.getInstance().getCurrentUser();
+        uid = user.getUid();
+        //get email login
+       /* Intent intent = appCompatActivity.getIntent();
+        uid = intent.getStringExtra("uid");
+        email = intent.getStringExtra("email");*/
+        getContactInfo(uid);
         return root;
     }
     @Override
@@ -97,84 +116,88 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         changAvatar.setOnClickListener(this);
     }
 
+    private void getContactInfo(String uid){
+        Query query =reference.child("users").child(uid);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                Contact contact = snapshot.getValue(Contact.class);
+                Toast.makeText(appCompatActivity,contact.getFullName(),Toast.LENGTH_LONG).show();
+                //set contact info
+                mFullName.setText(contact.getFullName());
+                mEmail.setText(contact.getEmail());
+                mPhone.setText(contact.getPhone());
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        });
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.btnEdit:
-                Contact contact = new Contact("Duc Son","09876543234","son@gmail.com"
-                ,"avatar.jpg", 1.290270,103.851959);
-                updContactDB(contact);
+                updContactDB( uid);
                 break;
             case R.id.btnGenQR:
                 myQRCode();
                 break;
             case R.id.changeAvatar:
+                //open gallery
                 break;
         }
     }
 
-    private void updContactDB(Contact contact){
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference reference = firebaseDatabase.getReference();
-        String uid = reference.push().getKey();
-        reference.child("users").child(uid).setValue(contact);
+    private void updContactDB(String uid){
+        String name, phone;
+        name = mFullName.getText().toString();
+        phone = mPhone.getText().toString();
+        reference.child("users").child(uid).child("fullName").setValue(name);
+        reference.child("users").child(uid).child("phone").setValue(phone);
     }
 
     private void myQRCode(){
-        String fullname = mFullName.getText().toString();
-        String phone = mPhone.getText().toString();
-        String email = mEmail.getText().toString();
-        String img = changAvatar.getTag().toString();
-        final Contact[] contact = {null};
-        FusedLocationProviderClient fusedLocationProviderClient = LocationServices
-                .getFusedLocationProviderClient(appCompatActivity);
-        Task<Location> task = fusedLocationProviderClient.getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location == null) {
-                            return;
-                        }
-                        contact[0] = new Contact(fullname,phone,email,img,location.getLatitude(),location.getLongitude());
-                        Toast.makeText(appCompatActivity, contact[0].toString()
-                                , Toast.LENGTH_SHORT).show();
-                        JSONObject userObj = new JSONObject();
-                        try {
-                            userObj.put("fullname", fullname);
-                            userObj.put("email", email);
-                            userObj.put("phone", phone);
-                            userObj.put("image", img);
-                            userObj.put("latitude", location.getLatitude());
-                            userObj.put("longtitude", location.getLongitude());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            generateQRCode(userObj);
-                        } catch (WriterException | IOException e) {
-                            e.printStackTrace();
-                        }
+        Query query =reference.child("users").child(uid);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                Contact contact = snapshot.getValue(Contact.class);
+                Toast.makeText(appCompatActivity,contact.getFullName(),Toast.LENGTH_LONG).show();
+                JSONObject userObj = new JSONObject();
+                try {
+                    userObj.put("fullname", contact.getFullName());
+                    userObj.put("email", contact.getEmail());
+                    userObj.put("phone", contact.getPhone());
+                    userObj.put("image", contact.getImage());
+                    userObj.put("latitude", contact.getLatitude());
+                    userObj.put("longtitude", contact.getLongitude());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    generateQRCode(userObj);
+                } catch (WriterException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
 
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(Exception e) {
-                        //Exception handling logic.
-                       e.printStackTrace();
-                    }
-                });
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override
     public void onResume() {
-        setting.requestLocationUpdatesWithCallback();
         super.onResume();
     }
 
     @Override
     public void onDestroy() {
-        setting.removeLocationUpdatesWithCallback();
         super.onDestroy();
     }
 
@@ -209,27 +232,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             new ImageSaver(appCompatActivity).
                     setFileName("myqrcode.png").
                     setDirectoryName("FindMyFriend").save(resultBitmap);
-           // saveQRCodeFile();
+
         }
     }
-    private void saveQRCodeFile() throws IOException {
-        String fileName = System.currentTimeMillis() + ".jpg";
-        String storePath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        File appDir = new File(storePath);
-        if (!appDir.exists()) {
-            appDir.mkdir();
-        }
-        File file = new File(appDir, fileName);
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-        boolean isSuccess = resultBitmap.compress(Bitmap.CompressFormat.JPEG, 70, fileOutputStream);
-        fileOutputStream.flush();
-        fileOutputStream.close();
-        Uri uri = Uri.fromFile(file);
-        appCompatActivity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
-        if (isSuccess) {
-            Toast.makeText(appCompatActivity, "Barcode has been saved locally", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(appCompatActivity, "Barcode save failed", Toast.LENGTH_SHORT).show();
-        }
-    }
+
 }

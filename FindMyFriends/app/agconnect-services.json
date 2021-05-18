@@ -25,6 +25,14 @@
 		"api_key":"CgB6e3x9dyJbX/s6uu5v+gaHs+baK3W8R172cby8T5mjldTWvJNSzhG4xJSTeehzt/bmcDAwYTgRhGU0RpCSvcIR",
 		"package_name":"com.mtha.findmyfriends"
 	},
+	"oauth_client":{
+		"client_id":"104265641",
+		"client_type":1
+	},
+	"app_info":{
+		"app_id":"104265641",
+		"package_name":"com.mtha.findmyfriends"
+	},
 	"service":{
 		"analytics":{
 			"collector_url":"datacollector-dra.dt.hicloud.com,datacollector-dra.dt.dbankcloud.cn",
@@ -42,11 +50,21 @@
 		}
 	},
 	"region":"SG",
-	"configuration_version":"2.0",
+	"configuration_version":"3.0",
 	"appInfos":[
 		{
 			"package_name":"com.mtha.findmyfriends",
-			"app_id":"104265641"
+			"client":{
+				"app_id":"104265641"
+			},
+			"app_info":{
+				"package_name":"com.mtha.findmyfriends",
+				"app_id":"104265641"
+			},
+			"oauth_client":{
+				"client_type":1,
+				"client_id":"104265641"
+			}
 		}
 	]
 }

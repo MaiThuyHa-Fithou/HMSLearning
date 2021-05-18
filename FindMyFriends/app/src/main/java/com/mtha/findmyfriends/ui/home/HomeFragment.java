@@ -2,9 +2,9 @@ package com.mtha.findmyfriends.ui.home;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
+
 import android.content.Context;
-import android.content.Intent;
+
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -12,46 +12,48 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.os.Build;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
 import com.google.firebase.database.ValueEventListener;
-import com.huawei.hmf.tasks.OnCompleteListener;
+import com.huawei.agconnect.auth.AGConnectAuth;
+import com.huawei.agconnect.auth.AGConnectUser;
+
 import com.huawei.hmf.tasks.OnFailureListener;
 import com.huawei.hmf.tasks.OnSuccessListener;
 import com.huawei.hmf.tasks.Task;
-import com.huawei.hms.common.ApiException;
-import com.huawei.hms.hmsscankit.ScanUtil;
+
 import com.huawei.hms.location.FusedLocationProviderClient;
+
+import com.huawei.hms.location.LocationAvailability;
 import com.huawei.hms.location.LocationCallback;
 import com.huawei.hms.location.LocationRequest;
+import com.huawei.hms.location.LocationResult;
 import com.huawei.hms.location.LocationServices;
+
+import com.huawei.hms.location.SettingsClient;
 import com.huawei.hms.maps.CameraUpdate;
 import com.huawei.hms.maps.CameraUpdateFactory;
 import com.huawei.hms.maps.HuaweiMap;
@@ -60,29 +62,21 @@ import com.huawei.hms.maps.MapView;
 import com.huawei.hms.maps.MapsInitializer;
 import com.huawei.hms.maps.OnMapReadyCallback;
 import com.huawei.hms.maps.model.BitmapDescriptorFactory;
+import com.huawei.hms.maps.model.CameraPosition;
 import com.huawei.hms.maps.model.LatLng;
 import com.huawei.hms.maps.model.MarkerOptions;
-import com.huawei.hms.maps.model.PolylineOptions;
-import com.huawei.hms.ml.scan.HmsScan;
-import com.huawei.hms.ml.scan.HmsScanAnalyzerOptions;
-import com.huawei.hms.support.account.AccountAuthManager;
-import com.huawei.hms.support.account.request.AccountAuthParams;
-import com.huawei.hms.support.account.request.AccountAuthParamsHelper;
-import com.huawei.hms.support.account.service.AccountAuthService;
-import com.mtha.findmyfriends.MainActivity;
+
 import com.mtha.findmyfriends.R;
 import com.mtha.findmyfriends.data.model.Contact;
-import com.mtha.findmyfriends.data.model.ContactDbHelper;
-import com.mtha.findmyfriends.ui.login.LoginActivity;
 import com.mtha.findmyfriends.utils.CheckLocationSetting;
-import com.mtha.findmyfriends.utils.Contants;
+
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import static android.app.Activity.RESULT_OK;
+import org.json.JSONException;
+
+import java.util.List;
+
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
@@ -93,12 +87,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private HomeViewModel friendsViewModel;
     private final static String MAPVIEW_BUNDLE_KEY = "mapview";
     private FusedLocationProviderClient fusedLocationProviderClient;
-
-    CheckLocationSetting checkLocationSetting;
-
+    AGConnectUser user;
     FirebaseDatabase database;
     DatabaseReference reference;
 
+    String uid;
+    //current location
+    SettingsClient settingsClient;
+    LocationRequest mLocationRequest;
+    LocationCallback mLocationCallback;
+    double latitude, longitude;
+    int count;
     //custom marker
     private final static String ImageUrl = "https://png.pngtree.com/png-clipart/20190924/original/pngtree-businessman-user-avatar-free-vector-png-image_4827807.jpg";
     private View mCustomMarkerView;
@@ -113,11 +112,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         MapsInitializer.setApiKey("CgB6e3x9dyJbX/s6uu5v+gaHs+baK3W8R172cby8T5mjldTWvJNSzhG4xJSTeehzt/bmcDAwYTgRhGU0RpCSvcIR");
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(appCompatActivity);
-        checkLocationSetting = new CheckLocationSetting(appCompatActivity,appCompatActivity.getApplicationContext());
-        checkLocationSetting.requestLocation();
         initViews(root, savedInstanceState);
         database = FirebaseDatabase.getInstance();
         reference = database.getReference();
+        user = AGConnectAuth.getInstance().getCurrentUser();
+        uid = user.getUid();
+        Log.e("uid", "[" + uid + "]");
+        getCurrentLocation();
         return root;
     }
 
@@ -131,45 +132,60 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(HuaweiMap huaweiMap) {
         mHuaweiMap = huaweiMap;
+        if (ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         mHuaweiMap.setMyLocationEnabled(true);
         mHuaweiMap.getUiSettings().setZoomControlsEnabled(true);
         mHuaweiMap.getUiSettings().setMyLocationButtonEnabled(true);
-        mHuaweiMap.setLocationSource(new LocationSource() {
-            @Override
-            public void activate(OnLocationChangedListener onLocationChangedListener) {
-                locationChangedListener = onLocationChangedListener;
-            }
+        CameraPosition build = new CameraPosition.Builder().target(new LatLng(latitude, longitude)).zoom(4).build();
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(build);
+        mHuaweiMap.animateCamera(cameraUpdate);
+        // updLocation();
+        try {
+            createMarkersFromJson();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
-            @Override
-            public void deactivate() {
-
-            }
-        });
-
-       try {
-            Task<Location> lastLocation = fusedLocationProviderClient.getLastLocation();
-            if(lastLocation!=null)
-                lastLocation.addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        locationChangedListener.onLocationChanged(location);
-                        if (locationChangedListener != null && location!=null) {
-                            locationChangedListener.onLocationChanged(location);
-                            addCustomeMarker(new LatLng(location.getLatitude(), location.getLongitude()));
-
-
+    private void getCurrentLocation(){
+        //create a fusedLocationProviderClient
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(appCompatActivity);
+        //create a settingsClient
+        settingsClient = LocationServices.getSettingsClient(appCompatActivity);
+        mLocationRequest = new LocationRequest();
+        // set the interval for location updates, in milliseconds.
+        mLocationRequest.setInterval(10000);
+        // set the priority of the request
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        if (null == mLocationCallback) {
+            mLocationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    if (locationResult != null) {
+                        List<Location> locations = locationResult.getLocations();
+                        if (!locations.isEmpty()) {
+                            Location loc = locations.get(0);
+                            latitude = loc.getLatitude();
+                            longitude = loc.getLongitude();
+                            reference.child("users").child(uid).child("latitude").setValue(latitude);
+                            reference.child("users").child(uid).child("longtitude").setValue(longitude);
                         }
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(Exception e) {
+                }
+                @Override
+                public void onLocationAvailability(LocationAvailability locationAvailability) {
+                    if (locationAvailability != null) {
+                        boolean flag = locationAvailability.isLocationAvailable();
+                        Toast.makeText(appCompatActivity, "isLocationAvailable:"+flag, Toast.LENGTH_SHORT).show();
                     }
-                });
-          createMarkersFromJson();
-        } catch (Exception e) {
-            Log.d("last Location ", e.getMessage());
+                }
+            };
         }
-
     }
 
     private void initViews(View root, Bundle savedInstanceState) {
@@ -185,30 +201,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mapView.getMapAsync(this);
 
     }
-
-
-    private void addCustomeMarker(LatLng latLng) {
-        Glide.with(appCompatActivity).
-                load(ImageUrl)
-                .asBitmap()
-                .fitCenter()
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
-                        Log.i(Contants.TAG,"Marker "+ImageUrl);
-                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                                latLng, 12f);
-                        mHuaweiMap.animateCamera(cameraUpdate);
-                        mHuaweiMap.addMarker(new MarkerOptions()
-                                .position(latLng)
-                                .title("user name")
-                                .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomMarkerView, bitmap))));
-
-                    }
-                });
-        Log.i(Contants.TAG,"Marker no load image");
-    }
-
     private Bitmap getMarkerBitmapFromView(View view, @DrawableRes int resId) {
 
         mMarkerImageView.setImageResource(resId);
@@ -225,6 +217,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         view.draw(canvas);
         return returnedBitmap;
     }
+
     private void createMarkersFromJson() throws JSONException {
         // De-serialize the JSON string into an array of city objects
 
@@ -232,7 +225,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
 
-                for (DataSnapshot data: snapshot.getChildren()) {
+                for (DataSnapshot data : snapshot.getChildren()) {
                     Contact contact = data.getValue(Contact.class);
                     mHuaweiMap.addMarker(new MarkerOptions()
                             .title(contact.getFullName())
@@ -244,6 +237,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     );
                 }
             }
+
             @Override
             public void onCancelled(@NonNull @NotNull DatabaseError error) {
                 Log.w("TAG", "loadPost:onCancelled", error.toException());
@@ -251,34 +245,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         });
 
     }
-    private Bitmap getMarkerBitmapFromView(View view, Bitmap bitmap) {
-
-        mMarkerImageView.setImageBitmap(bitmap);
-        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
-        view.buildDrawingCache();
-        Bitmap returnedBitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(returnedBitmap);
-        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_IN);
-        Drawable drawable = view.getBackground();
-        if (drawable != null)
-            drawable.draw(canvas);
-        view.draw(canvas);
-        return returnedBitmap;
-    }
 
     @Override
     public void onStart() {
         super.onStart();
-        checkLocationSetting.requestLocation();
         mapView.onStart();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        checkLocationSetting.requestLocationUpdatesWithCallback();
         mapView.onResume();
     }
 
@@ -297,10 +273,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        checkLocationSetting.removeLocationUpdatesWithCallback();
         mapView.onDestroy();
     }
-
 
 
 }

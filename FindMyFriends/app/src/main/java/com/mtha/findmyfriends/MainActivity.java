@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.huawei.agconnect.auth.AGConnectAuth;
 import com.huawei.hmf.tasks.OnCompleteListener;
 import com.huawei.hmf.tasks.Task;
 import com.huawei.hms.common.ApiException;
@@ -33,7 +34,7 @@ import com.huawei.hms.support.account.service.AccountAuthService;
 import com.mtha.findmyfriends.data.model.Contact;
 import com.mtha.findmyfriends.data.model.ContactDbHelper;
 import com.mtha.findmyfriends.ui.login.LoginActivity;
-import com.mtha.findmyfriends.utils.CheckLocationSetting;
+
 import com.mtha.findmyfriends.utils.Contants;
 
 import androidx.annotation.NonNull;
@@ -58,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_SCAN_ONE = 0X01;
     public static final int DEFAULT_VIEW = 0x22;
     public static final String RESULT = "SCAN_RESULT";
-    CheckLocationSetting locationSetting ;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
         checkPermissions(MainActivity.this);
-        locationSetting = new CheckLocationSetting(MainActivity.this,getApplicationContext());
 
     }
 
@@ -124,8 +122,7 @@ public class MainActivity extends AppCompatActivity {
         if(requestCode==882 || requestCode==883){
             if (grantResults.length > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                Log.i("location request", "onRequestPermissionsResult: apply LOCATION PERMISSION successful");
-                locationSetting.requestLocation();
+
             } else {
                 Log.i("not permission", "onRequestPermissionsResult: apply LOCATION PERMISSSION  failed");
             }
@@ -233,26 +230,10 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.onBackPressed();
                 return true;
             case R.id.item_signOut:
-                authParams = new AccountAuthParamsHelper(AccountAuthParams.DEFAULT_AUTH_REQUEST_PARAM).
-                        setProfile().setAuthorizationCode().createParams();
-                AccountAuthService authService = AccountAuthManager.getService(MainActivity.this,authParams);
-                authService.cancelAuthorization().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            // Processing after a successful authorization revoking.
-                            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                            Log.i(Contants.TAG, "onSuccess: ");
-                        } else {
-                            // Handle the exception.
-                            Exception exception = task.getException();
-                            if (exception instanceof ApiException){
-                                int statusCode = ((ApiException) exception).getStatusCode();
-                                Log.i(Contants.TAG, "onFailure: " + statusCode);
-                            }
-                        }
-                    }
-                });
+                //todo something
+                AGConnectAuth.getInstance().signOut();
+                //call login form
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -261,13 +242,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPostResume() {
-        locationSetting.requestLocationUpdatesWithCallback();
+
         super.onPostResume();
     }
 
     @Override
     protected void onDestroy() {
-        locationSetting.removeLocationUpdatesWithCallback();
+
         super.onDestroy();
     }
 

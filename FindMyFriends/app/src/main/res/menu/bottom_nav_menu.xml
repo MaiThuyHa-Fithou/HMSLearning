@@ -10,10 +10,15 @@
         android:id="@+id/navigation_list_friend"
         android:icon="@drawable/twotone_people_24"
         android:title="@string/title_friend" />
+    <item
+        android:id="@+id/navigation_message"
+        android:icon="@drawable/outline_chat_24"
+        android:title="@string/title_message" />
 
     <item
         android:id="@+id/navigation_profile"
         android:icon="@drawable/outline_person_outline_24"
         android:title="@string/title_profile" />
+
 
 </menu>

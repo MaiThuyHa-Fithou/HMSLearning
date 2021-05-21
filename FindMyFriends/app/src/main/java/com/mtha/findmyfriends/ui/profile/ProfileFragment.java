@@ -174,6 +174,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     userObj.put("image", contact.getImage());
                     userObj.put("latitude", contact.getLatitude());
                     userObj.put("longtitude", contact.getLongitude());
+                    userObj.put("uid", contact.getUid());
+                    userObj.put("status", contact.getStatus());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

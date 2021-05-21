@@ -4,12 +4,14 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/huaweilogo_96x96"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/huaweilogo_96x96"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FindMyFriends">
-        <activity android:name=".ui.login.SplashActivity" >
+        <activity android:name=".ui.message.MessageActivity"
+            android:theme="@style/AppTheme"></activity>
+        <activity android:name=".ui.login.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,15 +21,14 @@
         <activity android:name=".ui.register.UserRegisterActivity" />
         <activity
             android:name=".ui.login.LoginActivity"
-            android:label="">
-
-        </activity>
+            android:label=""></activity>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" />
         <activity android:name=".ui.listfriend.CapturePhotoActivity" />
-    </application>
-    <uses-feature android:name="android.hardware.camera" /> <!-- Location kit needs Location permission -->
+    </application> <!-- Location kit needs Location permission -->
+    <uses-feature android:name="android.hardware.camera" />
+
     <uses-feature android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

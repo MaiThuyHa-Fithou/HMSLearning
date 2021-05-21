@@ -3,72 +3,133 @@ package com.mtha.findmyfriends.ui.listfriend;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
-
+import android.graphics.Typeface;
 import android.os.Bundle;
-
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-
 import androidx.annotation.NonNull;
-
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.ListFragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.huawei.agconnect.auth.AGConnectAuth;
+import com.huawei.agconnect.auth.AGConnectUser;
 import com.mtha.findmyfriends.R;
+import com.mtha.findmyfriends.data.model.ChatList;
 import com.mtha.findmyfriends.data.model.Contact;
 import com.mtha.findmyfriends.data.model.ContactAdapter;
+import com.mtha.findmyfriends.data.model.ContactsAdapter;
+import com.mtha.findmyfriends.data.model.OnItemClick;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
-public class ListFriendFragment extends Fragment  {
+public class ListFriendFragment extends Fragment {
     private AppCompatActivity appCompatActivity;
     private ListFriendViewModel addFriendViewModel;
     ArrayList<Contact> listContact = new ArrayList<>();
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference reference = database.getReference();
 
-    ListView lvContact;
-    ContactAdapter contactAdapter;
 
-    SearchView searchView;
-    SearchView.OnQueryTextListener queryTextListener;
+    //add new
+    private RecyclerView recyclerView;
+
+    Typeface MR, MRR;
+    FrameLayout frameLayout;
+    TextView es_descp, es_title;
+
+    private ContactsAdapter userAdapter;
+    private List<Contact> mUsers;
+    static OnItemClick onItemClick;
+
+    EditText search_users;
+    AGConnectUser curUser;
+
+    public static ListFriendFragment newInstance(OnItemClick click) {
+
+        onItemClick = click;
+        Bundle args = new Bundle();
+
+        ListFriendFragment fragment = new ListFriendFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        addFriendViewModel =
-                new ViewModelProvider(this).get(ListFriendViewModel.class);
+
         View root = inflater.inflate(R.layout.fragment_listfriend, container, false);
-        
+
         //add back button on ActionBar
         appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        lvContact = root.findViewById(R.id.lvContact);
-        loadData(root);
+
+        MRR = Typeface.createFromAsset(getContext().getAssets(), "font/myriadregular.ttf");
+        MR = Typeface.createFromAsset(getContext().getAssets(), "font/myriad.ttf");
+
+        recyclerView = root.findViewById(R.id.recycler_view);
+        frameLayout = root.findViewById(R.id.es_layout);
+        es_descp = root.findViewById(R.id.es_descp);
+        es_title = root.findViewById(R.id.es_title);
+
+        es_descp.setTypeface(MR);
+        es_title.setTypeface(MRR);
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration);
+        curUser = AGConnectAuth.getInstance().getCurrentUser(); //get current user
+        mUsers = new ArrayList<>();
+
+        readUsers();
+
+        search_users = root.findViewById(R.id.search_users);
+        search_users.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                searchUsers(charSequence.toString().toLowerCase());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
         return root;
     }
+
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -76,73 +137,74 @@ public class ListFriendFragment extends Fragment  {
         if (context instanceof Activity)
             appCompatActivity = (AppCompatActivity) context;
     }
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
-    }
+    private void searchUsers(String s) {
 
-    private void loadData(View view){
-        reference.child("users").addValueEventListener(new ValueEventListener() {
+        Query query = FirebaseDatabase.getInstance().getReference().child("users").orderByChild("fullName")
+                .startAt(s)
+                .endAt(s + "\uf8ff");
+
+        query.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                Iterable<DataSnapshot> data = snapshot.getChildren();
-                Iterator<DataSnapshot> ls = data.iterator();
-                while (ls.hasNext()){
-                    Contact contact = ls.next().getValue(Contact.class);
-                    listContact.add(contact);
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mUsers.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Contact user = snapshot.getValue(Contact.class);
+
+                    assert user != null;
+                    assert curUser != null;
+                    if (!user.getUid().equals(curUser.getUid())) {
+                        mUsers.add(user);
+                    }
                 }
-                contactAdapter=new ContactAdapter(view.getContext(),listContact,R.layout.item_contact);
-                lvContact.setAdapter(contactAdapter);
+
+                userAdapter = new ContactsAdapter(getContext(), onItemClick, mUsers, false);
+                recyclerView.setAdapter(userAdapter);
             }
 
             @Override
-            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void readUsers() {
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("users");
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (search_users.getText().toString().equals("")) {
+                    mUsers.clear();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Contact user = snapshot.getValue(Contact.class);
+
+                        if (user != null && user.getUid() != null &&
+                                curUser != null && !user.getUid().equals(curUser.getUid())) {
+                            mUsers.add(user);
+
+                        }
+                    }
+
+
+                    if (mUsers.size() == 0) {
+                        frameLayout.setVisibility(View.VISIBLE);
+                    } else {
+                        frameLayout.setVisibility(View.GONE);
+                    }
+
+                    userAdapter = new ContactsAdapter(getContext(), onItemClick, mUsers, false);
+                    recyclerView.setAdapter(userAdapter);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
     }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_search,menu);
-        SearchManager searchManager = (SearchManager) appCompatActivity.getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.item_search)
-                .getActionView();
-        searchView.setSearchableInfo(searchManager
-                .getSearchableInfo(appCompatActivity.getComponentName()));
-        searchView.setMaxWidth(Integer.MAX_VALUE);
-        // listening to search query text change
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                // filter recycler view when query submitted
-           //     contactAdapter.getFilter().filter(query);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String query) {
-                // filter recycler view when text is changed
-            //    contactAdapter.getFilter().filter(query);
-                return false;
-            }
-        });
-       super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.item_search:
-                // Not implemented here
-                return false;
-            default:
-                break;
-        }
-        searchView.setOnQueryTextListener(queryTextListener);
-        return super.onOptionsItemSelected(item);
-    }
-
-
 }

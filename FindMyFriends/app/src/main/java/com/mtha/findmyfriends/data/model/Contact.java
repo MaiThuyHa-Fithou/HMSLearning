@@ -9,6 +9,16 @@ public class Contact {
     private String email;
     private double latitude, longitude;
     private String image;
+    private String uid;
+    private String status;
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
@@ -38,6 +48,25 @@ public class Contact {
         this.phone = phoneNumb;
         this.email = email;
 
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public Contact(String fullName, String phone, String email, double latitude, double longitude, String image, String uid) {
+        this.fullName = fullName;
+        this.phone = phone;
+        this.email = email;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.image = image;
+        this.uid = uid;
+        this.status="online";
     }
 
     public Contact(String fullName, String phoneNumb, String email, double latitude, double longitude) {

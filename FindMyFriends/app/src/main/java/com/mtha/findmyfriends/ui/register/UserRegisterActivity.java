@@ -139,7 +139,7 @@ public class UserRegisterActivity extends AppCompatActivity implements View.OnCl
                                 user = AGConnectAuth.getInstance().getCurrentUser();
                                 userID = user.getUid();
                                 //insert in realtime db firebase
-                                Contact contact = new Contact(name,phone,email,"avatar.jpg",0,0);
+                                Contact contact = new Contact(name,phone,email,0,0,"avatar.jpg",userID);
                                 insContactDB(contact, userID);
                                 //call back login form
                                 Intent intent = new Intent();
@@ -166,7 +166,6 @@ public class UserRegisterActivity extends AppCompatActivity implements View.OnCl
     private void insContactDB(Contact contact, String userID){
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference reference = database.getReference();
-       // uid = reference.push().getKey();
         reference.child("users").child(userID).setValue(contact);
 
     }

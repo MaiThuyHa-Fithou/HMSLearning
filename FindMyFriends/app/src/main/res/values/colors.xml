@@ -8,5 +8,11 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="trans">#00000000</color>
+    <color name="grey">#4D5057</color>
+    <color name="green">#4FC18A</color>
+    <color name="black_shade">#333333</color>
 
+    <color name="colorPrimary">#222A35</color>
+    <color name="colorPrimaryDark">#222A35</color>
 </resources>

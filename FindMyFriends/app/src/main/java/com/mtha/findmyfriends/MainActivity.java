@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_SCAN_ONE = 0X01;
     public static final int DEFAULT_VIEW = 0x22;
     public static final String RESULT = "SCAN_RESULT";
+    private Contact contact;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         // menu should be considered as top level destinations.
 
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_list_friend, R.id.navigation_profile)
+                R.id.navigation_home, R.id.navigation_list_friend,R.id.navigation_message, R.id.navigation_profile)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -164,6 +165,8 @@ public class MainActivity extends AppCompatActivity {
                     String image = jsonObject.getString("image");
                     double latitude = jsonObject.getDouble("latitude");
                     double longtitude = jsonObject.getDouble("longtitude");
+                    String uid =jsonObject.getString("uid");
+                    contact = new Contact(fullname,phone,email,latitude,longtitude,image,uid);
                     etName.setText(fullname);
                     etEmail.setText(email);
                     etPhone.setText(phone);
@@ -180,17 +183,14 @@ public class MainActivity extends AppCompatActivity {
                 contactDetail.findViewById(R.id.btnAdd).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        //get data contact and save json object
-                        String fullName = etName.getText().toString();
-                        String phoneNumb = etPhone.getText().toString();
-                        String email = etEmail.getText().toString();
-                        double latitude = Double.parseDouble(etLatitude.getText().toString());
-                        double longtitude = Double.parseDouble(etLongtitude.getText().toString());
-                        String image = imageView.getTag().toString();
-                        Contact contact = new Contact(fullName,phoneNumb,email,image,latitude,longtitude);
-                        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-                        String uid = reference.push().getKey();
-                        reference.child("users").child(uid).setValue(contact);
+                        if(contact !=null){
+                            DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+                            String uid = reference.push().getKey();
+                            reference.child("users").child(uid).setValue(contact);
+                        }else{
+                            Log.e("Contact", "No data");
+                        }
+
                         dialog.dismiss();
                     }
                 });
